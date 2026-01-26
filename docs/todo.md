@@ -111,21 +111,21 @@
   - [x] Public Routes (Schüler:innen-Modus, Standard-Liste)
   - [ ] Share-Token Validation für Custom-Listen
 
-- [ ] **3.7** Schul-Lizenz-Check
-  - [ ] Funktion: prüfe ob Schule lizenziert ist (mind. 1 aktiver User)
-  - [ ] Alle Users einer lizenzierten Schule als automatisch aktiv behandeln
-  - [ ] PDF-Export freigeben wenn Schule lizenziert oder Custom-Liste vom aktiven User
+- [x] **3.7** Schul-Lizenz-Check
+  - [x] Funktion: prüfe ob Schule lizenziert ist (mind. 1 aktiver User)
+  - [x] Alle Users einer lizenzierten Schule als automatisch aktiv behandeln
+  - [x] PDF-Export freigeben wenn Schule lizenziert oder Custom-Liste vom aktiven User
 
-- [ ] **3.8** Passwort-Reset (Admin-only)
-  - [ ] Admin kann Benutzer-Passwort zurücksetzen
-  - [ ] PUT/POST `/admin/users/{userId}/reset-password`
-  - [ ] Neues Passwort generieren oder Admin setzt es manuell
+- [x] **3.8** Passwort-Reset (Admin-only)
+  - [x] Admin kann Benutzer-Passwort zurücksetzen
+  - [x] POST `/admin/users/{userId}/reset-password`
+  - [x] Neues Passwort generieren
 
-- [ ] **3.9** Twilio SMS Integration
-  - [ ] Environment Variables laden (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, ADMIN_PHONE_NUMBER)
-  - [ ] SMS-Funktion: "neue registrierung bei vielseitig" senden
-  - [ ] Trigger bei User-Registrierung
-  - [ ] Error Handling & Fallback (nur Log + Backend-Hinweis, kein Block)
+- [x] **3.9** Twilio SMS Integration
+  - [x] Environment Variables laden (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, ADMIN_PHONE_NUMBER)
+  - [x] SMS-Funktion: "neue registrierung bei vielseitig" senden
+  - [x] Trigger bei User-Registrierung
+  - [x] Error Handling & Fallback (nur Log + Backend-Hinweis, kein Block)
 
 - [x] **3.10** Git Commit & Push
   - [x] Commit authentication system
@@ -135,7 +135,7 @@
 
 ## 4. Backend – User-Management (Admin)
 
-- [ ] **4.1** Pending Inbox Endpoints
+- [x] **4.1** Pending Inbox Endpoints
   - [x] GET `/admin/pending-users` – Liste ausstehender User
   - [x] POST `/admin/users/{userId}/approve` – User aktivieren (status=active)
   - [x] POST `/admin/users/{userId}/reject` – User ablehnen
@@ -143,27 +143,28 @@
   - [x] POST `/admin/schools/{schoolId}/approve` – Schule aktivieren
   - [x] POST `/admin/schools/{schoolId}/reject` – Schule ablehnen
 
-- [ ] **4.2** User CRUD (Admin)
+- [x] **4.2** User CRUD (Admin)
   - [x] GET `/admin/users` – alle User
   - [x] GET `/admin/users/{userId}` – Einzelheiten
   - [x] POST `/admin/users` – neuen User anlegen
   - [x] PUT `/admin/users/{userId}` – User bearbeiten
   - [x] DELETE `/admin/users/{userId}` – User löschen
   - [x] PUT `/admin/users/{userId}/activation` – status/active_until setzen
+  - [x] POST `/admin/users/{userId}/reset-password` – Password zurücksetzen
 
-- [ ] **4.3** School CRUD (Admin)
-  - [ ] GET `/admin/schools` – alle Schulen
-  - [ ] POST `/admin/schools` – neue Schule anlegen
-  - [ ] PUT `/admin/schools/{schoolId}` – Schule bearbeiten
-  - [ ] DELETE `/admin/schools/{schoolId}` – Schule löschen
+- [x] **4.3** School CRUD (Admin)
+  - [x] GET `/admin/schools` – alle Schulen
+  - [x] POST `/admin/schools` – neue Schule anlegen
+  - [x] PUT `/admin/schools/{schoolId}` – Schule bearbeiten
+  - [x] DELETE `/admin/schools/{schoolId}` – Schule löschen
 
-- [ ] **4.4** Admin Notes & Comments
-  - [ ] User-Feld `notes`/`admin_comment` editierbar
-  - [ ] Ansicht in Admin-Verwaltung
+- [x] **4.4** Admin Notes & Comments
+  - [x] User-Feld `notes` editierbar (in User model)
+  - [x] Ansicht in Admin-Verwaltung (GET /admin/users zeigt notes)
 
-- [ ] **4.5** Git Commit & Push
-  - [ ] Commit admin user and school management
-  - [ ] Push to repository
+- [x] **4.5** Git Commit & Push
+  - [x] Commit admin user and school management
+  - [x] Push to repository
 
 ---
 
@@ -251,25 +252,25 @@
   - [x] POST `/api/lists/{listId}/session` – Session starten
   - [x] PUT `/api/lists/{listId}/session/{sessionId}` – Session beenden
   - [x] Session-ID (UUID) für Tracking
-  - [ ] POST `/api/analytics/session/start` – neue Session anlegen
-  - [ ] Parameter: `list_id` (nullable für Standard), `theme_id` (welches Theme gewählt)
-  - [ ] Returns: `analytics_session_id` (uuid)
-  - [ ] Speichere `started_at`, `is_standard_list` Flag
+  - [x] POST `/api/analytics/session/start` – neue Session anlegen
+  - [x] Parameter: `list_id` (nullable für Standard), `theme_id` (welches Theme gewählt)
+  - [x] Returns: `analytics_session_id` (uuid)
+  - [x] Speichere `started_at`, `is_standard_list` Flag
 
-- [ ] **8.3** Analytics Assignment Tracking
-  - [ ] POST `/api/analytics/assignment` – Adjektiv einer Kategorie zuordnen
-  - [ ] Parameter: `analytics_session_id`, `adjective_id`, `bucket` (selten/manchmal/oft)
-  - [ ] Speichere `assigned_at` Timestamp
+- [x] **8.3** Analytics Assignment Tracking
+  - [x] POST `/api/analytics/assignment` – Adjektiv einer Kategorie zuordnen
+  - [x] Parameter: `analytics_session_id`, `adjective_id`, `bucket` (selten/manchmal/oft)
+  - [x] Speichere `assigned_at` Timestamp
 
-- [ ] **8.4** Analytics Session Finish
-  - [ ] POST `/api/analytics/session/finish` – Session abschließen
-  - [ ] Parameter: `analytics_session_id`
-  - [ ] Speichere `finished_at` Timestamp
+- [x] **8.4** Analytics Session Finish
+  - [x] POST `/api/analytics/session/finish` – Session abschließen
+  - [x] Parameter: `analytics_session_id`
+  - [x] Speichere `finished_at` Timestamp
 
-- [ ] **8.5** PDF-Export Flag
-  - [ ] POST `/api/analytics/session/pdf-export` – PDF wurde exportiert
-  - [ ] Parameter: `analytics_session_id`
-  - [ ] Speichere `pdf_exported_at` Timestamp
+- [x] **8.5** PDF-Export Flag
+  - [x] POST `/api/analytics/session/pdf-export` – PDF wurde exportiert
+  - [x] Parameter: `analytics_session_id`
+  - [x] Speichere `pdf_exported_at` Timestamp
   - [ ] Lösche Session-State aus `localStorage` (Backend-Signal für Frontend)
 
 ---

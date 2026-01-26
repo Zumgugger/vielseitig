@@ -13,6 +13,7 @@ from app.api import (
     student,
     pdf,
     admin_analytics,
+    analytics,
 )
 
 api_router = APIRouter()
@@ -28,3 +29,4 @@ api_router.include_router(qrcode.router)
 api_router.include_router(student.router)
 api_router.include_router(pdf.router)
 api_router.include_router(admin_analytics.router)
+api_router.include_router(analytics.router)

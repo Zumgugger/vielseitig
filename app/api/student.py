@@ -1,7 +1,6 @@
 """Student mode - adjective retrieval and analytics session management."""
-from datetime import datetime, timedelta
-from typing import List, Optional
-from uuid import uuid4
+from typing import List
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -11,7 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_session
 from app.models.list import List as ListModel
 from app.models.adjective import Adjective
-from app.models.analytics import AnalyticsSession
+from app.services.analytics import (
+    finish_analytics_session as finish_session_service,
+    start_analytics_session as start_session_service,
+)
 
 
 router = APIRouter(prefix="/api/lists", tags=["student"])
@@ -183,60 +185,8 @@ async def create_analytics_session(
     Creates session record for tracking student sorting activity.
     Returns session ID for subsequent analytics tracking.
     """
-    # Verify list exists and is accessible
-    result = await db.execute(
-        select(ListModel).where(ListModel.id == listId)
-    )
-    list_obj = result.scalar_one_or_none()
-    
-    if not list_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="List not found"
-        )
-    
-    # If not default list, verify it's shared
-    if not list_obj.is_default:
-        if not list_obj.share_enabled:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="This list is not shared"
-            )
-        
-        # Verify share token hasn't expired
-        if list_obj.share_expires_at and datetime.utcnow() > list_obj.share_expires_at:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Share link has expired"
-            )
-        
-        # Verify owner is active
-        if list_obj.owner_user_id:
-            from app.models.user import User
-            user_result = await db.execute(
-                select(User).where(User.id == list_obj.owner_user_id)
-            )
-            owner = user_result.scalar_one_or_none()
-            
-            if not owner or owner.status != "active":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Owner account is not active"
-                )
-    
-    # Create analytics session
-    session = AnalyticsSession(
-        id=str(uuid4()),
-        list_id=list_obj.id,
-        is_standard_list=list_obj.is_default,
-        theme_id=None,  # Theme selection happens in frontend
-        started_at=datetime.utcnow()
-    )
-    
-    db.add(session)
-    await db.commit()
-    await db.refresh(session)
-    
+    session = await start_session_service(db, list_id=listId, theme_id=None)
+
     return AnalyticsSessionResponse(
         session_id=session.id,
         list_id=session.list_id,
@@ -256,24 +206,12 @@ async def finish_analytics_session(
     
     Records completion timestamp for tracking.
     """
-    # Get session
-    result = await db.execute(
-        select(AnalyticsSession).where(
-            AnalyticsSession.id == sessionId,
-            AnalyticsSession.list_id == listId
-        )
-    )
-    session = result.scalar_one_or_none()
-    
-    if not session:
+    session = await finish_session_service(db, session_id=sessionId)
+
+    if session.list_id != listId:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Session does not belong to this list",
         )
-    
-    # Mark as finished
-    session.finished_at = datetime.utcnow()
-    db.add(session)
-    await db.commit()
-    
+
     return {"message": "Session finished", "session_id": sessionId}

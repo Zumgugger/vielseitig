@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.school import School
 from app.models.admin import Admin
 from app.api.deps import require_admin
+from app.services.admin_utils import reset_user_password, generate_temporary_password
 
 
 router = APIRouter(prefix="/admin", tags=["admin-users"])
@@ -452,6 +453,24 @@ async def set_user_activation(
         "id": user.id,
         "status": user.status,
         "active_until": user.active_until
+    }
+
+
+@router.post("/users/{userId}/reset-password")
+async def reset_password(
+    userId: int,
+    admin: Admin = Depends(require_admin),
+    db: AsyncSession = Depends(get_session)
+):
+    """Reset a user's password to a temporary one."""
+    temp_password = await generate_temporary_password()
+    email = await reset_user_password(db, userId, temp_password)
+    
+    return {
+        "message": "Password reset",
+        "email": email,
+        "temporary_password": temp_password,
+        "note": "User should change this password on next login"
     }
 
 

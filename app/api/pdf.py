@@ -1,6 +1,6 @@
 """PDF export of student sorting assignments with hexagon visualization."""
 import io
-from typing import List, Optional
+from typing import List
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -20,6 +20,7 @@ from app.db.session import get_session
 from app.models.analytics import AnalyticsSession, AnalyticsAssignment
 from app.models.adjective import Adjective
 from app.models.list import List as ListModel
+from app.services.analytics import ALLOWED_BUCKETS, mark_pdf_export, record_assignment as record_assignment_service
 
 
 router = APIRouter(prefix="/api/sessions", tags=["pdf"])
@@ -28,6 +29,11 @@ router = APIRouter(prefix="/api/sessions", tags=["pdf"])
 class PDFExportRequest(BaseModel):
     session_id: str
     include_hexagon: bool = True
+
+
+class AssignmentRecordRequest(BaseModel):
+    adjective_id: int
+    bucket: str
 
 
 def draw_hexagon(c, x, y, size=1.5, text="", fill=True):
@@ -59,6 +65,9 @@ def draw_hexagon(c, x, y, size=1.5, text="", fill=True):
     if text:
         c.setFont("Helvetica-Bold", 8)
         c.drawCentredString(x, y - 0.3, text)
+
+
+BUCKET_ORDER = tuple(name for name in ("selten", "manchmal", "oft") if name in ALLOWED_BUCKETS)
 
 
 @router.post("/{sessionId}/pdf")
@@ -102,6 +111,11 @@ async def export_session_pdf(
         .order_by(AnalyticsAssignment.bucket)
     )
     assignments = assignments_result.scalars().all()
+
+    adjectives_result = await db.execute(
+        select(Adjective).where(Adjective.list_id == session.list_id)
+    )
+    adjectives_by_id = {adj.id: adj for adj in adjectives_result.scalars()}
     
     # Group by bucket
     buckets = {}
@@ -150,28 +164,23 @@ async def export_session_pdf(
     # Results by bucket
     if buckets:
         elements.append(Paragraph("Sortierergebnisse nach Kategorie", heading_style))
-        
-        for bucket_num in sorted(buckets.keys()):
-            bucket_assignments = buckets[bucket_num]
-            bucket_name = f"Kategorie {bucket_num + 1}"  # Convert 0-index to 1-index
-            
-            elements.append(Paragraph(f"<b>{bucket_name}</b>", styles['Normal']))
-            
-            # Create table with adjectives
+
+        for bucket_name in BUCKET_ORDER:
+            if bucket_name not in buckets:
+                continue
+
+            bucket_assignments = buckets[bucket_name]
+            elements.append(Paragraph(f"<b>{bucket_name.capitalize()}</b>", styles['Normal']))
+
             table_data = []
             for assignment in bucket_assignments:
-                # Get adjective
-                adj_result = await db.execute(
-                    select(Adjective).where(Adjective.id == assignment.adjective_id)
-                )
-                adj = adj_result.scalar_one_or_none()
-                
+                adj = adjectives_by_id.get(assignment.adjective_id)
                 if adj:
                     table_data.append([
                         Paragraph(f"<b>{adj.word}</b>", styles['Normal']),
-                        Paragraph(adj.explanation, styles['Normal'])
+                        Paragraph(adj.explanation or "", styles['Normal'])
                     ])
-            
+
             if table_data:
                 table = Table(
                     table_data,
@@ -186,9 +195,9 @@ async def export_session_pdf(
                     ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
                     ('GRID', (0, 0), (-1, -1), 1, colors.grey)
                 ]))
-                
+
                 elements.append(table)
-            
+
             elements.append(Spacer(1, 0.3*cm))
     else:
         elements.append(Paragraph("Keine Sortierergebnisse vorhanden", styles['Normal']))
@@ -204,9 +213,7 @@ async def export_session_pdf(
     pdf_buffer.seek(0)
     
     # Mark session as exported
-    session.pdf_exported_at = datetime.utcnow()
-    db.add(session)
-    await db.commit()
+    await mark_pdf_export(db, session_id=sessionId)
     
     # Return PDF
     return FileResponse(
@@ -219,73 +226,23 @@ async def export_session_pdf(
 @router.post("/{sessionId}/record-assignment")
 async def record_assignment(
     sessionId: str,
-    adjective_id: int,
-    bucket: int,
+    payload: AssignmentRecordRequest,
     db: AsyncSession = Depends(get_session)
 ):
     """
     Record a student's adjective assignment during sorting.
     
-    Stores which adjective was placed in which bucket/hexagon position.
+    Buckets must be one of: selten, manchmal, oft.
     """
-    # Verify session exists
-    session_result = await db.execute(
-        select(AnalyticsSession).where(AnalyticsSession.id == sessionId)
+    assignment = await record_assignment_service(
+        db,
+        session_id=sessionId,
+        adjective_id=payload.adjective_id,
+        bucket=payload.bucket,
     )
-    session = session_result.scalar_one_or_none()
-    
-    if not session:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found"
-        )
-    
-    # Verify bucket is valid (0-5 for hexagon)
-    if bucket < 0 or bucket > 5:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bucket must be 0-5 (for hexagon positions)"
-        )
-    
-    # Verify adjective exists and belongs to list
-    adj_result = await db.execute(
-        select(Adjective).where(
-            Adjective.id == adjective_id,
-            Adjective.list_id == session.list_id
-        )
-    )
-    adj = adj_result.scalar_one_or_none()
-    
-    if not adj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Adjective not found in this list"
-        )
-    
-    # Check if assignment already exists (update instead of duplicate)
-    existing_result = await db.execute(
-        select(AnalyticsAssignment).where(
-            AnalyticsAssignment.session_id == sessionId,
-            AnalyticsAssignment.adjective_id == adjective_id
-        )
-    )
-    existing = existing_result.scalar_one_or_none()
-    
-    if existing:
-        # Update existing assignment
-        existing.bucket = bucket
-        existing.assigned_at = datetime.utcnow()
-        db.add(existing)
-    else:
-        # Create new assignment
-        assignment = AnalyticsAssignment(
-            session_id=sessionId,
-            adjective_id=adjective_id,
-            bucket=bucket,
-            assigned_at=datetime.utcnow()
-        )
-        db.add(assignment)
-    
-    await db.commit()
-    
-    return {"message": "Assignment recorded", "adjective_id": adjective_id, "bucket": bucket}
+
+    return {
+        "message": "Assignment recorded",
+        "adjective_id": assignment.adjective_id,
+        "bucket": assignment.bucket,
+    }

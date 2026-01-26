@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./data/vielseitig.db"
     secret_key: str = "change-me"
     session_expiry_days: int = 2
+    
+    # Twilio SMS configuration (optional)
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_from_number: str = ""
+    admin_phone_number: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

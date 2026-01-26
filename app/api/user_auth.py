@@ -12,6 +12,7 @@ from app.core.sessions import session_store
 from app.models.user import User
 from app.models.school import School
 from app.api.deps import get_optional_session_token, require_user
+from app.services.sms import twilio_client
 
 
 router = APIRouter(prefix="/user", tags=["user-auth"])
@@ -101,8 +102,15 @@ async def user_register(
     await db.commit()
     await db.refresh(new_user)
     
-    # TODO: Send SMS to admin (section 3.9)
-    # This will be implemented when Twilio integration is added
+    # Get school name for SMS notification
+    school_result = await db.execute(
+        select(School).where(School.id == school_id)
+    )
+    school = school_result.scalar_one_or_none()
+    school_name = school.name if school else "Unknown"
+    
+    # Send SMS notification to admin
+    await twilio_client.send_registration_notification(new_user.email, school_name)
     
     return UserRegisterResponse(
         message="Registration successful. Admin will review your request.",
