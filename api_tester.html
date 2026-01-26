@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vielseitig API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #1f77b4; }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input {
+            width: 300px;
+        }
+        button {
+            background: #1f77b4;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background: #155fa0;
+        }
+        .response {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: #555; }
+        .endpoint {
+            background: #e8f4f8;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Vielseitig API Tester</h1>
+    
+    <div class="section">
+        <h2>Admin Login</h2>
+        <div class="endpoint">POST /admin/login</div>
+        <div class="form-group">
+            <label for="adminUsername">Username:</label>
+            <input type="text" id="adminUsername" value="admin">
+        </div>
+        <div class="form-group">
+            <label for="adminPassword">Password:</label>
+            <input type="password" id="adminPassword" value="changeme">
+        </div>
+        <button onclick="adminLogin()">Login</button>
+        <div id="adminLoginResponse" class="response" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>User Registration</h2>
+        <div class="endpoint">POST /user/register</div>
+        <div class="form-group">
+            <label for="userEmail">Email:</label>
+            <input type="email" id="userEmail" placeholder="teacher@school.ch">
+        </div>
+        <div class="form-group">
+            <label for="userPassword">Password:</label>
+            <input type="password" id="userPassword" placeholder="password123">
+        </div>
+        <div class="form-group">
+            <label for="schoolName">School Name:</label>
+            <input type="text" id="schoolName" placeholder="Testschule">
+        </div>
+        <button onclick="userRegister()">Register</button>
+        <div id="userRegisterResponse" class="response" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Get Default List</h2>
+        <div class="endpoint">GET /l</div>
+        <button onclick="getDefaultList()">Get Standard List</button>
+        <div id="defaultListResponse" class="response" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+        <h2>API Documentation</h2>
+        <p>For full API documentation with all endpoints, visit:</p>
+        <a href="http://localhost:8000/docs" target="_blank" style="color: #1f77b4; font-size: 16px;">
+            📚 http://localhost:8000/docs (Swagger UI)
+        </a>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        async function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const responseDiv = document.getElementById('adminLoginResponse');
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✓ Success!\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `✗ Error: ${data.detail || 'Unknown error'}`;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `✗ Network Error: ${error.message}`;
+            }
+        }
+
+        async function userRegister() {
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const school_name = document.getElementById('schoolName').value;
+            const responseDiv = document.getElementById('userRegisterResponse');
+
+            try {
+                const response = await fetch(`${API_BASE}/user/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password, school_name })
+                });
+
+                const data = await response.json();
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✓ Success!\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `✗ Error: ${data.detail || 'Unknown error'}`;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `✗ Network Error: ${error.message}`;
+            }
+        }
+
+        async function getDefaultList() {
+            const responseDiv = document.getElementById('defaultListResponse');
+
+            try {
+                const response = await fetch(`${API_BASE}/l`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✓ Success! Found ${data.adjectives.length} adjectives\n\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `✗ Error: ${data.detail || 'Unknown error'}`;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `✗ Network Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
