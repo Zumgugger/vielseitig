@@ -33,7 +33,7 @@ clean:
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 
 migrate:
-	@echo "Migration system not yet implemented"
+	.venv/bin/alembic upgrade head
 
 seed:
-	@echo "Seed system not yet implemented"
+	.venv/bin/python -m app.db.seed

@@ -43,27 +43,32 @@
 
 ## 2. Datenbank-Schema & ORM
 
-- [ ] **2.1** SQLite Schema implementieren
-  - [ ] Tabelle `schools` (id, name, status, created_at)
-  - [ ] Tabelle `users` (id, email, password_hash, school_id, status, active_until, created_at, last_login_at, notes)
-  - [ ] Tabelle `admins` (id, username, password_hash, created_at, last_login_at)
-  - [ ] Tabelle `lists` (id, name, description, is_default, owner_user_id, share_token, share_expires_at, share_enabled, share_with_school, source_list_id, created_at, updated_at)
-  - [ ] Tabelle `adjectives` (id, list_id, word, explanation, example, order_index, active)
-  - [ ] Tabelle `analytics_sessions` (id/uuid, list_id, is_standard_list, theme_id, started_at, finished_at, pdf_exported_at)
-  - [ ] Tabelle `analytics_assignments` (id, session_id, adjective_id, bucket, assigned_at)
+- [x] **2.1** SQLite Schema implementieren
+  - [x] Tabelle `schools` (id, name, status, created_at)
+  - [x] Tabelle `users` (id, email, password_hash, school_id, status, active_until, created_at, last_login_at, notes)
+  - [x] Tabelle `admins` (id, username, password_hash, created_at, last_login_at)
+  - [x] Tabelle `lists` (id, name, description, is_default, owner_user_id, share_token, share_expires_at, share_enabled, share_with_school, source_list_id, created_at, updated_at)
+  - [x] Tabelle `adjectives` (id, list_id, word, explanation, example, order_index, active)
+  - [x] Tabelle `analytics_sessions` (id/uuid, list_id, is_standard_list, theme_id, started_at, finished_at, pdf_exported_at)
+  - [x] Tabelle `analytics_assignments` (id, session_id, adjective_id, bucket, assigned_at)
 
-- [ ] **2.2** Seed-Daten für Standardliste
-  - [ ] 30 Adjektive (aus Spec 5.2.2) in SQL INSERT Scripts
-  - [ ] Seed-Script idempotent machen (keine Duplikate)
-  - [ ] Standardliste als `is_default=true`, `owner_user_id=NULL`
+- [x] **2.2** Seed-Daten für Standardliste
+  - [x] 30 Adjektive (aus Spec 5.2.2) in SQL INSERT Scripts
+  - [x] Seed-Script idempotent machen (keine Duplikate)
+  - [x] Standardliste als `is_default=true`, `owner_user_id=NULL`
+  - [x] Default admin account (username: admin, password: changeme)
 
-- [ ] **2.3** Indizes & Constraints
-  - [ ] Unique Index auf `users.email`
-  - [ ] Unique Index auf `schools.name`
-  - [ ] Foreign Keys: `users.school_id` → `schools.id`
-  - [ ] Foreign Keys: `lists.owner_user_id` → `users.id` (nullable)
-  - [ ] Foreign Keys: `adjectives.list_id` → `lists.id`
-  - [ ] Foreign Keys: `analytics_sessions.list_id` → `lists.id` (nullable)
+- [x] **2.3** Indizes & Constraints
+  - [x] Unique Index auf `users.email`
+  - [x] Unique Index auf `schools.name`
+  - [x] Foreign Keys: `users.school_id` → `schools.id`
+  - [x] Foreign Keys: `lists.owner_user_id` → `users.id` (nullable)
+  - [x] Foreign Keys: `adjectives.list_id` → `lists.id`
+  - [x] Foreign Keys: `analytics_sessions.list_id` → `lists.id` (nullable)
+
+- [ ] **2.4** Git Commit & Push
+  - [ ] Commit database models, migrations, and seed data
+  - [ ] Push to repository
 
 ---
 
@@ -121,6 +126,10 @@
   - [ ] SMS-Funktion: "neue registrierung bei vielseitig" senden
   - [ ] Trigger bei User-Registrierung
   - [ ] Error Handling & Fallback (nur Log + Backend-Hinweis, kein Block)
+
+- [ ] **3.10** Git Commit & Push
+  - [ ] Commit authentication system
+  - [ ] Push to repository
 
 ---
 
@@ -201,6 +210,10 @@
   - [ ] DELETE `/admin/standard-list/{adjectiveId}` – Adjektiv aus Standard-Liste entfernen
   - [ ] Daten geben auch an Frontend (für Inline Editing)
 
+- [ ] **6.6** Git Commit & Push
+  - [ ] Commit user management and list management
+  - [ ] Push to repository
+
 ---
 
 ## 7. Backend – Share-Links & Public Access
@@ -274,6 +287,10 @@
   - [ ] Validierung: ist PDF-Export erlaubt? (Standard-Liste ohne Lizenz → nein; Custom-Liste → ja wenn Owner aktiv)
   - [ ] Returns: PDF Binary mit `Content-Type: application/pdf`
   - [ ] Filename: `ich-bin-vielseitig.pdf`
+
+- [ ] **9.4** Git Commit & Push
+  - [ ] Commit analytics and PDF export backend
+  - [ ] Push to repository
 
 ---
 
@@ -676,6 +693,10 @@
 - [ ] **21.3** QR-Code Download/Print
   - [ ] Button: "QR-Code drucken" oder "QR-Code herunterladen"
   - [ ] Dialog oder neuer Tab mit QR zum Drucken
+
+- [ ] **21.4** Git Commit & Push
+  - [ ] Commit frontend implementation
+  - [ ] Push to repository
 
 ---
 
