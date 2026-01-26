@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../api';
+import { Button, Input, Toast } from '../components';
+import { adminAuthApi } from '../api/client';
+import { useAuth } from '../store/AuthContext';
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState('admin');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+  const { loginAdmin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,59 +19,80 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      await authAPI.adminLogin({ username, password });
-      navigate('/admin/dashboard');
+      const response = await adminAuthApi.loginAdmin(email, password);
+      loginAdmin(response.data);
+      setToast({ message: 'Admin erfolgreich angemeldet!', type: 'success' });
+      setTimeout(() => navigate('/admin/pending'), 1500);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login fehlgeschlagen');
+      const message = err.response?.data?.detail || 'Login fehlgeschlagen. Bitte versuchen Sie es erneut.';
+      setError(message);
+      setToast({ message, type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="card max-w-md w-full mx-4">
-        <h1 className="text-center mb-6">Admin Login</h1>
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+      
+      <div className="card max-w-md w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold mb-2">🔐 Admin Login</h1>
+          <p className="text-gray-600">Nur für Administratoren</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="label">Benutzername</label>
-            <input
-              type="text"
-              className="input"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <Input
+            label="E-Mail oder Benutzername"
+            type="email"
+            placeholder="admin@vielseitig.local"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={error && error.includes('E-Mail') ? error : ''}
+            required
+          />
 
-          <div>
-            <label className="label">Passwort</label>
-            <input
-              type="password"
-              className="input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Passwort"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={error && error.includes('Passwort') ? error : ''}
+            required
+          />
 
-          <button
+          {error && !error.includes('E-Mail') && !error.includes('Passwort') && (
+            <div className="alert alert-danger">
+              {error}
+            </div>
+          )}
+
+          <Button
             type="submit"
-            className="btn btn-primary w-full"
+            variant="primary"
+            size="md"
+            className="w-full"
             disabled={loading}
           >
             {loading ? 'Wird angemeldet...' : 'Anmelden'}
-          </button>
+          </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="divider"></div>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            <Link to="/" className="text-gray-500 hover:text-blue-600">
+              ← Zurück zur Startseite
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}        <div className="mt-6 text-center">
           <Link to="/" className="text-sm text-gray-500 hover:text-primary">
             ← Zurück zur Startseite
           </Link>
