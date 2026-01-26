@@ -2,19 +2,23 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-// Create axios instance with default config
+/**
+ * Create axios instance with default config
+ * Vite proxy handles /api, /admin, /user, /l routes to backend
+ */
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Important for cookie-based authentication
+  withCredentials: true, // Include cookies for session auth
 });
 
-// Request interceptor
+/**
+ * Request interceptor - add auth tokens or other headers if needed
+ */
 api.interceptors.request.use(
   (config) => {
-    // Add any custom headers here if needed
     return config;
   },
   (error) => {
@@ -22,32 +26,149 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+/**
+ * Response interceptor - handle errors globally
+ */
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    // Handle common errors
-    if (error.response) {
-      // Server responded with error status
-      console.error('API Error:', error.response.data);
-      
-      // Handle 401 Unauthorized (redirect to login)
-      if (error.response.status === 401) {
-        // Clear any local auth state
-        window.location.href = '/user/login';
-      }
-    } else if (error.request) {
-      // Request made but no response
-      console.error('Network Error:', error.request);
-    } else {
-      // Something else happened
-      console.error('Error:', error.message);
+    if (error.response?.status === 401) {
+      // Unauthorized - redirect to login
+      localStorage.removeItem('authToken');
+      window.location.href = '/user/login';
     }
-    
     return Promise.reject(error);
   }
 );
 
 export default api;
+
+/**
+ * Analytics API
+ */
+export const analyticsApi = {
+  startSession: (listId, userId) =>
+    api.post('/analytics/session/start', { list_id: listId, user_id: userId }),
+
+  recordAssignment: (sessionId, adjective, bucket) =>
+    api.post('/analytics/assignment', { session_id: sessionId, adjective, bucket }),
+
+  finishSession: (sessionId) =>
+    api.post('/analytics/session/finish', { session_id: sessionId }),
+
+  exportPdf: (sessionId, schoolName) =>
+    api.post('/analytics/session/pdf-export', { session_id: sessionId, school_name: schoolName }),
+};
+
+/**
+ * User authentication API
+ */
+export const authApi = {
+  registerUser: (email, password, firstName, lastName, school, role = 'teacher') =>
+    api.post('/user/register', {
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+      school,
+      role,
+    }),
+
+  loginUser: (email, password) =>
+    api.post('/user/login', { email, password }),
+
+  logoutUser: () =>
+    api.post('/user/logout'),
+
+  getUserProfile: () =>
+    api.get('/user/me'),
+};
+
+/**
+ * Admin authentication API
+ */
+export const adminAuthApi = {
+  loginAdmin: (email, password) =>
+    api.post('/admin/login', { email, password }),
+
+  logoutAdmin: () =>
+    api.post('/admin/logout'),
+
+  getAdminProfile: () =>
+    api.get('/admin/me'),
+};
+
+/**
+ * List management API
+ */
+export const listsApi = {
+  getUserLists: () =>
+    api.get('/lists'),
+
+  createList: (name, isPublic = false) =>
+    api.post('/lists', { name, is_public: isPublic }),
+
+  getList: (listId) =>
+    api.get(`/lists/${listId}`),
+
+  updateList: (listId, data) =>
+    api.put(`/lists/${listId}`, data),
+
+  deleteList: (listId) =>
+    api.delete(`/lists/${listId}`),
+
+  getAdjectives: (listId) =>
+    api.get(`/lists/${listId}/adjectives`),
+
+  addAdjective: (listId, adjective) =>
+    api.post(`/lists/${listId}/adjectives`, { adjective }),
+
+  removeAdjective: (listId, adjectiveId) =>
+    api.delete(`/lists/${listId}/adjectives/${adjectiveId}`),
+};
+
+/**
+ * Share link API
+ */
+export const shareApi = {
+  getPublicList: (shareToken) =>
+    api.get(`/l/${shareToken}`),
+
+  getShareLink: (listId) =>
+    api.get(`/lists/${listId}/share`),
+
+  createShareLink: (listId) =>
+    api.post(`/lists/${listId}/share`),
+
+  deleteShareLink: (listId) =>
+    api.delete(`/lists/${listId}/share`),
+
+  getQrCode: (listId) =>
+    api.get(`/lists/${listId}/qr`, { responseType: 'blob' }),
+};
+
+/**
+ * Admin management API
+ */
+export const adminApi = {
+  getUsers: (page = 1, limit = 50) =>
+    api.get(`/admin/users?page=${page}&limit=${limit}`),
+
+  getUser: (userId) =>
+    api.get(`/admin/users/${userId}`),
+
+  resetUserPassword: (userId) =>
+    api.post(`/admin/users/${userId}/reset-password`),
+
+  activateUser: (userId) =>
+    api.post(`/admin/users/${userId}/activate`),
+
+  deactivateUser: (userId) =>
+    api.post(`/admin/users/${userId}/deactivate`),
+
+  getAnalytics: () =>
+    api.get('/admin/analytics'),
+
+  getPendingInbox: () =>
+    api.get('/admin/inbox/pending'),
+};

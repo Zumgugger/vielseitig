@@ -1,17 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles/index.css';
 
-// Placeholder pages (we'll create these)
+// Context providers
+import { ThemeProvider } from './store/ThemeContext';
+import { AuthProvider } from './store/AuthContext';
+
+// Layout components
+import { AppHeader, AppFooter } from './components';
+
+// Pages
 import HomePage from './pages/HomePage';
 import StudentSortPage from './pages/StudentSortPage';
 import UserLoginPage from './pages/UserLoginPage';
 import UserRegisterPage from './pages/UserRegisterPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 
-function App() {
+function AppContent() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <AppHeader />
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
@@ -27,7 +35,20 @@ function App() {
           {/* <Route path="/user/*" element={<UserArea />} /> */}
           {/* <Route path="/admin/*" element={<AdminArea />} /> */}
         </Routes>
-      </div>
+      </main>
+      <AppFooter />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }
