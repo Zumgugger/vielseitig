@@ -321,28 +321,29 @@
 
 ## 11. Frontend – Struktur & Tech-Stack
 
-- [ ] **11.1** Frontend Framework Auswahl
-  - [ ] React, Vue, oder Vanilla JS + Framework?
-  - [ ] Build-Tool: Webpack, Vite, Create React App?
-  - [ ] CSS Framework oder CSS-in-JS?
-  - [ ] Vorschlag: React + Vite + Tailwind CSS (oder ähnlich)
+- [x] **11.1** Frontend Framework Auswahl
+  - [x] React 18.3.1 chosen (installed)
+  - [x] Build-Tool: Vite 4.5.14 (installed)
+  - [x] CSS Framework: Tailwind CSS 3.4.19 (installed)
+  - [x] Vite configured with React plugin, port 3000
+  - [x] Proxy to backend: /api, /admin, /user, /l routes → :8000
 
-- [ ] **11.2** Frontend Folder Structure
-  - [ ] `src/pages/` – Page Components
-  - [ ] `src/components/` – Reusable Components
-  - [ ] `src/hooks/` – Custom React Hooks (falls React)
-  - [ ] `src/api/` – API Client Functions
-  - [ ] `src/store/` – State Management (Context API, Redux, Zustand)
-  - [ ] `src/styles/` – Global Styles, Themes
-  - [ ] `src/utils/` – Utilities (random, validation, etc.)
-  - [ ] `src/assets/` – Images, Icons, Fonts
+- [x] **11.2** Frontend Folder Structure & Shared Components
+  - [x] Create reusable UI components: Button, Input, AppHeader, AppFooter, Toast, Loading
+  - [x] Component barrel export (components/index.js)
+  - [x] Create utility helpers (formatDate, formatDuration, copyToClipboard, validation)
+  - [x] Create custom hooks (useAsync, useLocalStorage, useDebounce, useOutsideClick, useFetch)
+  - [x] Expand API client with organized endpoints (analytics, auth, lists, share, admin)
+  - [x] Create ThemeContext with 6 themes (default, ocean, sunset, forest, purple, dark)
+  - [x] Create AuthContext for user/admin session state
+  - [x] Update App.jsx with ThemeProvider, AuthProvider, layout components
 
-- [ ] **11.3** Build & Development Setup
-  - [ ] `package.json` mit Dependencies
-  - [ ] Dev Server starten (z.B. `npm run dev`)
-  - [ ] Build Script (`npm run build`)
-  - [ ] Environment Variables (.env files)
-  - [ ] Backend Dev Server: `make dev` (Port 8000)
+- [ ] **11.3** Global Styles & Responsive Design
+  - [ ] Global CSS reset (tailwind preflight)
+  - [ ] Define breakpoints (mobile <900px, desktop 900px+)
+  - [ ] Font family and sizing defaults
+  - [ ] Spacing scale consistency
+  - [ ] Verify Tailwind working on all pages
 
 ---
 
