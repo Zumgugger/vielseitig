@@ -8,6 +8,11 @@ from app.api import (
     teacher,
     lists,
     admin_standard_list,
+    share,
+    qrcode,
+    student,
+    pdf,
+    admin_analytics,
 )
 
 api_router = APIRouter()
@@ -18,3 +23,8 @@ api_router.include_router(admin_users.router)
 api_router.include_router(teacher.router)
 api_router.include_router(lists.router)
 api_router.include_router(admin_standard_list.router)
+api_router.include_router(share.router)
+api_router.include_router(qrcode.router)
+api_router.include_router(student.router)
+api_router.include_router(pdf.router)
+api_router.include_router(admin_analytics.router)

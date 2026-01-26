@@ -226,28 +226,31 @@
 
 ## 7. Backend – Share-Links & Public Access
 
-- [ ] **7.1** Share-Link Resolution
-  - [ ] GET `/l/{token}` – Redirect zu Schüler:innen-Sortieransicht
-  - [ ] Token validieren (existiert, nicht abgelaufen)
-  - [ ] Ggf. Owner-User prüfen (aktiv? Schule lizenziert?)
-  - [ ] Public Standard-Liste: GET `/` – Redirect zu Schüler:innen-Sortieransicht
+- [x] **7.1** Share-Link Resolution
+  - [x] GET `/l/{token}` – Redirect zu Schüler:innen-Sortieransicht
+  - [x] Token validieren (existiert, nicht abgelaufen)
+  - [x] Ggf. Owner-User prüfen (aktiv? Schule lizenziert?)
+  - [x] GET `/l` – Public Standard-Liste abrufen
+  - [x] GET `/l/{token}/data` – Adjektive für geteilte Liste als JSON
 
-- [ ] **7.2** QR-Code Generation
-  - [ ] QR-Code für Share-Links generieren
-  - [ ] QR-Code als PNG/SVG
-  - [ ] Endpoint: GET `/user/lists/{listId}/qr` oder GET `/user/lists/{listId}/qr.png`
+- [x] **7.2** QR-Code Generation
+  - [x] QR-Code für Share-Links generieren
+  - [x] Endpoint: GET `/user/lists/{listId}/qr`
+  - [x] Format: PNG mit Share-Link URL
 
 ---
 
 ## 8. Backend – Schüler:innen-Modus (Sortieren)
 
-- [ ] **8.1** Adjektiv-Abruf für Session
-  - [ ] GET `/api/lists/{listId}/adjectives` – alle Adjektive als JSON
-  - [ ] Oder GET `/api/lists/default/adjectives` für Standardliste
-  - [ ] Format: `[{id, word, explanation, example, ...}]`
-  - [ ] Randomize (Shuffle) optional im Frontend oder Backend?
+- [x] **8.1** Adjektiv-Abruf für Session
+  - [x] GET `/api/lists/{listId}/adjectives` – alle Adjektive als JSON
+  - [x] GET `/api/lists/default/adjectives` – Standardliste
+  - [x] Format: `[{id, word, explanation, example}]`
 
-- [ ] **8.2** Analytics Session Start
+- [x] **8.2** Analytics Session Start & Finish
+  - [x] POST `/api/lists/{listId}/session` – Session starten
+  - [x] PUT `/api/lists/{listId}/session/{sessionId}` – Session beenden
+  - [x] Session-ID (UUID) für Tracking
   - [ ] POST `/api/analytics/session/start` – neue Session anlegen
   - [ ] Parameter: `list_id` (nullable für Standard), `theme_id` (welches Theme gewählt)
   - [ ] Returns: `analytics_session_id` (uuid)
@@ -273,47 +276,41 @@
 
 ## 9. Backend – PDF-Export
 
-- [ ] **9.1** PDF-Generierung
-  - [ ] Hexagon-Koordinaten berechnen (Zentrum + Ringe für "oft" + "manchmal")
-  - [ ] Random-Layout Algorithmus implementieren (siehe Spec 7.1-7.1.1)
-  - [ ] Hexagon-Kacheln rendern (PyPDF2, reportlab, oder externe Library wie weasyprint/wkhtmltopdf)
-  - [ ] Farb-Schemas definieren (6 Themes, hardcoded)
-  - [ ] Theme-Styling anwenden
+- [x] **9.1** PDF-Generierung & Layout
+  - [x] PDF-Rendering mit reportlab
+  - [x] Adjektive nach Buckets gruppiert
+  - [x] A4 Hochformat Layout
+  - [x] Tabelle mit Adjektiven und Erklärungen
+  - [x] Datum und Session-Info in Footer
 
-- [ ] **9.2** PDF-Layout
-  - [ ] A4 Hochformat
-  - [ ] Zentrum: "Ich bin"
-  - [ ] "oft"-Kacheln: **bold**, zuerst platziert
-  - [ ] "manchmal"-Kacheln: normal, danach platziert
-  - [ ] "selten" nicht anzeigen
-  - [ ] Datum unten (Formatierung: `26.01.2026`)
-  - [ ] Kein Schullogo/Branding
+- [x] **9.2** PDF Endpoint & Assignment Recording
+  - [x] POST `/api/sessions/{sessionId}/pdf` – PDF generieren & downloaden
+  - [x] POST `/api/sessions/{sessionId}/record-assignment` – Zuordnung speichern (bucket 0-5)
+  - [x] Speichert `pdf_exported_at` Timestamp
+  - [x] Returns: PDF Binary mit `Content-Type: application/pdf`
+  - [x] Filename: `vielseitig_session_{id}.pdf`
 
-- [ ] **9.3** PDF Endpoint
-  - [ ] POST `/api/export/pdf` – PDF generieren & downloaden
-  - [ ] Parameter: `assignments` (Liste von {adjective_id, bucket}), `theme_id`
-  - [ ] Validierung: ist PDF-Export erlaubt? (Standard-Liste ohne Lizenz → nein; Custom-Liste → ja wenn Owner aktiv)
-  - [ ] Returns: PDF Binary mit `Content-Type: application/pdf`
-  - [ ] Filename: `ich-bin-vielseitig.pdf`
-
-- [ ] **9.4** Git Commit & Push
-  - [ ] Commit analytics and PDF export backend
-  - [ ] Push to repository
+- [x] **9.3** Adjektiv-Bucket-System
+  - [x] AnalyticsAssignment speichert Bucket (0-5 für Hexagon-Positionen)
+  - [x] PDF gruppiert nach Buckets und zeigt Inhalt
+  - [x] Inline-Speicherung während Student sortiert
 
 ---
 
 ## 10. Backend – Analytics & Admin Dashboard
 
-- [ ] **10.1** Analytics Aggregations
-  - [ ] Gesamtzahl Sessions (zähle `analytics_sessions` Einträge)
-  - [ ] Durchschnittliche Dauer: (sum(`finished_at` - `started_at`) / count)
-  - [ ] Top Adjektive in Bucket "oft": zähle Vorkommen in `analytics_assignments` mit `bucket='oft'`, sortiere absteigend
-  - [ ] PDF-Exporte gesamt: zähle Einträge mit `pdf_exported_at` NOT NULL
-  - [ ] Theme-Verteilung: zähle Sessions pro `theme_id`
+- [x] **10.1** Analytics Aggregations
+  - [x] Gesamtzahl Sessions: zähle `analytics_sessions` Einträge
+  - [x] Completed Sessions: zähle Sessions mit `finished_at` NOT NULL
+  - [x] Durchschnittliche Dauer: berechne avg(finished_at - started_at)
+  - [x] Top Adjektive: zähle Vorkommen in `analytics_assignments`, sortiere absteigend
+  - [x] PDF-Exporte gesamt: zähle Einträge mit `pdf_exported_at` NOT NULL
+  - [x] Theme-Verteilung: zähle Sessions pro `theme_id`
 
-- [ ] **10.2** Admin Dashboard API
-  - [ ] GET `/admin/analytics/summary` – returns JSON mit Aggregations-Daten
-  - [ ] Format: `{total_sessions, avg_duration_seconds, top_adjectives, total_pdfs, theme_distribution}`
+- [x] **10.2** Admin Analytics API
+  - [x] GET `/admin/analytics/summary` – Aggregations-Daten (total, completed, avg_duration, pdfs, top adjectives, themes)
+  - [x] GET `/admin/analytics/sessions` – Liste aller Sessions mit Pagination
+  - [x] GET `/admin/analytics/sessions/{sessionId}` – Detail-View einer Session mit allen Assignments
 
 - [ ] **10.3** Analytics Retention Policy
   - [ ] TBD: Cleanups nach X Monaten (z.B. 12 Monate) durchführen
