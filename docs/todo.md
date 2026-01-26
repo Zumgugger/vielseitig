@@ -66,49 +66,49 @@
   - [x] Foreign Keys: `adjectives.list_id` → `lists.id`
   - [x] Foreign Keys: `analytics_sessions.list_id` → `lists.id` (nullable)
 
-- [ ] **2.4** Git Commit & Push
-  - [ ] Commit database models, migrations, and seed data
-  - [ ] Push to repository
+- [x] **2.4** Git Commit & Push
+  - [x] Commit database models, migrations, and seed data
+  - [x] Push to repository
 
 ---
 
 ## 3. Backend – Authentication & Authorization
 
-- [ ] **3.1** Passwort-Hashing & Validierung
-  - [ ] bcrypt oder Argon2 Integration
-  - [ ] Passwort-Hashing bei User-Registrierung
-  - [ ] Passwort-Validierung bei Login
-  - [ ] Passwort-Strength Anforderungen definieren
+- [x] **3.1** Passwort-Hashing & Validierung
+  - [x] bcrypt oder Argon2 Integration
+  - [x] Passwort-Hashing bei User-Registrierung
+  - [x] Passwort-Validierung bei Login
+  - [x] Passwort-Strength Anforderungen definieren
 
-- [ ] **3.2** Admin-Login Endpoint
-  - [ ] POST `/admin/login` (username, password)
-  - [ ] Admin-Session anlegen
-  - [ ] Admin-Session Cookies/Tokens (httpOnly, Secure)
-  - [ ] Admin-Logout Endpoint
+- [x] **3.2** Admin-Login Endpoint
+  - [x] POST `/admin/login` (username, password)
+  - [x] Admin-Session anlegen
+  - [x] Admin-Session Cookies/Tokens (httpOnly, Secure)
+  - [x] Admin-Logout Endpoint
 
-- [ ] **3.3** Admin Session Management
-  - [ ] Session Timeout nach 2 Tagen Inaktivität (Sliding)
-  - [ ] Session-Store (DB oder Redis)
-  - [ ] Middleware für Admin-Auth Überprüfung
+- [x] **3.3** Admin Session Management
+  - [x] Session Timeout nach 2 Tagen Inaktivität (Sliding)
+  - [x] Session-Store (DB oder Redis)
+  - [x] Middleware für Admin-Auth Überprüfung
 
-- [ ] **3.4** User-Login Endpoint
-  - [ ] POST `/user/login` (email, password)
-  - [ ] User-Session anlegen
-  - [ ] User-Session Cookies/Tokens (httpOnly, Secure)
-  - [ ] User-Logout Endpoint
+- [x] **3.4** User-Login Endpoint
+  - [x] POST `/user/login` (email, password)
+  - [x] User-Session anlegen
+  - [x] User-Session Cookies/Tokens (httpOnly, Secure)
+  - [x] User-Logout Endpoint
 
-- [ ] **3.5** User-Registrierung Endpoint
-  - [ ] POST `/user/register` (email, password, school_id/school_name)
-  - [ ] School-Validierung (existierend oder neu)
-  - [ ] Status auf `pending` setzen
-  - [ ] Neue School als `pending` anlegen, wenn nicht existiert
+- [x] **3.5** User-Registrierung Endpoint
+  - [x] POST `/user/register` (email, password, school_id/school_name)
+  - [x] School-Validierung (existierend oder neu)
+  - [x] Status auf `pending` setzen
+  - [x] Neue School als `pending` anlegen, wenn nicht existiert
   - [ ] **SMS an Admin senden** (siehe Twilio Integration 3.9)
   - [ ] Registrierungs-Email-Bestätigung TBD (für MVP wahrscheinlich nicht)
 
-- [ ] **3.6** Authorization Middleware
-  - [ ] Admin-only Routes schützen
-  - [ ] User-only Routes schützen
-  - [ ] Public Routes (Schüler:innen-Modus, Standard-Liste)
+- [x] **3.6** Authorization Middleware
+  - [x] Admin-only Routes schützen
+  - [x] User-only Routes schützen
+  - [x] Public Routes (Schüler:innen-Modus, Standard-Liste)
   - [ ] Share-Token Validation für Custom-Listen
 
 - [ ] **3.7** Schul-Lizenz-Check
@@ -127,9 +127,9 @@
   - [ ] Trigger bei User-Registrierung
   - [ ] Error Handling & Fallback (nur Log + Backend-Hinweis, kein Block)
 
-- [ ] **3.10** Git Commit & Push
-  - [ ] Commit authentication system
-  - [ ] Push to repository
+- [x] **3.10** Git Commit & Push
+  - [x] Commit authentication system
+  - [x] Push to repository
 
 ---
 
@@ -160,6 +160,10 @@
 - [ ] **4.4** Admin Notes & Comments
   - [ ] User-Feld `notes`/`admin_comment` editierbar
   - [ ] Ansicht in Admin-Verwaltung
+
+- [ ] **4.5** Git Commit & Push
+  - [ ] Commit admin user and school management
+  - [ ] Push to repository
 
 ---
 
