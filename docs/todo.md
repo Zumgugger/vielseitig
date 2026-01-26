@@ -401,7 +401,7 @@
   - [x] Responsive grid layout
   - [x] Links to sorting, login, registration pages
 
-- [x] **13.3** Sortieransicht Page (/sort or /l/{token})
+- [x] **13.3** Sortieransicht Page (/sort or /l/{token})  **[WORKING!]**
   - [x] Aktive Karte (Adjektiv groß, zentral)
   - [x] 3 Buckets: "Selten", "Manchmal", "Oft" (large buttons with emojis)
   - [x] Fortschritt anzeigen: X/30 mit Progress-Bar
@@ -410,6 +410,7 @@
   - [x] Keyboard controls: A/S/D oder Pfeiltasten für Zuordnung
   - [x] Space bar für Erklärung, I für Info
   - [x] Responsive grid for mobile/desktop
+  - [x] Ergebnisansicht mit Theme-Selector (Hex-Visualisierung deferred)
 
 - [x] **13.4** User-Login Page (/user/login)
   - [x] Email Input
@@ -437,7 +438,14 @@
   - [x] Uses useAuth context for admin session
   - [x] Link to homepage
 
-- [ ] **13.7** User-Bereich: Listen-Übersicht Page (/user/lists)
+- [x] **13.6.1** Update todo.md & Git Commit (Frontend Pages Complete)
+  - [x] Update todo.md to mark sections 13.3-13.6 complete with current status
+  - [x] Mark section 15 (hexagon) as deferred
+  - [x] Update implementation status summary
+  - [x] Git commit with message: "Complete frontend authentication and sorting pages (Sections 13.3-13.6)"
+  - [x] Git push to main
+
+- [ ] **13.7** User-Bereich: Listen-Übersicht Page (/user/lists)  **[NEXT PRIORITY]**
   - [ ] Tabelle/Karten-Ansicht with:
     - [ ] Listennamen
     - [ ] Anzahl Adjektive
@@ -447,7 +455,7 @@
     - [ ] Schul-Sharing Toggle
   - [ ] "Neue Liste" Button
 
-- [ ] **13.9** User-Bereich: Listen-Editor Page (`/user/lists/{listId}`)
+- [ ] **13.8** User-Bereich: Listen-Editor Page (`/user/lists/{listId}`)
   - [ ] Inline Editing für Listenname, Beschreibung
   - [ ] Tabelle/Liste mit Adjektiven:
     - [ ] Inline Edit für Word, Explanation, Example (Auto-Save bei Blur)
@@ -456,6 +464,12 @@
   - [ ] "Neues Adjektiv" Button
   - [ ] Status-Anzeige: "Speichert...", "Gespeichert", Error
   - [ ] Share-Settings Section (Link, QR-Code, Schul-Sharing Toggle)
+
+- [ ] **13.9.1** Update todo.md & Git Commit (User Pages Complete)
+  - [ ] Update todo.md to mark sections 13.7-13.9 complete
+  - [ ] Update progress notes in implementation status summary
+  - [ ] Git commit with message: "Implement user list management and profile pages (Sections 13.7-13.9)"
+  - [ ] Git push to main
 
 - [ ] **13.10** User-Bereich: Profil Page (`/user/profile`)
   - [ ] Email anzeigen (read-only)
@@ -495,6 +509,12 @@
     - [ ] PDF-Exporte gesamt
     - [ ] Theme-Verteilung (Balkendiagramm oder Torte)
   - [ ] Keine CSV-Export im MVP
+
+- [ ] **13.15.1** Update todo.md & Git Commit (Admin Pages Complete)
+  - [ ] Update todo.md to mark sections 13.10-13.15 complete
+  - [ ] Update progress notes in implementation status summary
+  - [ ] Git commit with message: "Implement admin dashboard and management pages (Sections 13.10-13.15)"
+  - [ ] Git push to main
 
 - [ ] **13.16** Admin-Bereich: Standardliste Editor (`/admin/standard-list`)
   - [ ] Wie 13.9, aber für Standardliste
@@ -545,7 +565,9 @@
 
 ---
 
-## 15. Frontend – Hexagon Rendering
+## 15. Frontend – Hexagon Rendering (DEFERRED - Not Started)
+
+**Note: Hex visualization deliberately deferred to post-MVP phase. Current results view shows theme selector and placeholder "Live-Vorschau kommt hier hin".**
 
 - [ ] **15.1** Hexagon Shape & SVG
   - [ ] Hexagon-Form definieren (Koordinaten, Größe)
@@ -581,6 +603,12 @@
   - [ ] Zuordnungen bleiben, nur Layout ändert sich
   - [ ] Hex-Grafik animiert Update (optional)
 
+- [ ] **15.7** Update todo.md & Git Commit (Hexagon Rendering Complete)
+  - [ ] Update todo.md to mark section 15 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Implement hexagon visualization for sorting results (Section 15)"
+  - [ ] Git push to main
+
 ---
 
 ## 16. Frontend – State Management & localStorage
@@ -597,6 +625,12 @@
 - [ ] **16.2** localStorage Persistierung
   - [ ] Schreibe Session State regelmäßig in localStorage
   - [ ] Lade State bei Seiten-Refresh
+
+- [ ] **16.3** Update todo.md & Git Commit (State Persistence Complete)
+  - [ ] Update todo.md to mark section 16 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Implement session state persistence with localStorage (Section 16)"
+  - [ ] Git push to main
   - [ ] Lösche State nach PDF-Export (Backend Signal?)
   - [ ] localStorage Key: z.B. `vielseitig_session_{list_id}`
 
@@ -696,6 +730,12 @@
   - [ ] localStorage state löschen (Signal vom Backend oder im Frontend)
   - [ ] Optional: "Neuer Durchlauf" Hinweis
 
+- [ ] **20.4** Update todo.md & Git Commit (PDF Export Complete)
+  - [ ] Update todo.md to mark section 20 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Implement PDF export functionality (Section 20)"
+  - [ ] Git push to main
+
 ---
 
 ## 21. Frontend – QR-Code Display
@@ -714,9 +754,11 @@
   - [ ] Button: "QR-Code drucken" oder "QR-Code herunterladen"
   - [ ] Dialog oder neuer Tab mit QR zum Drucken
 
-- [ ] **21.4** Git Commit & Push
-  - [ ] Commit frontend implementation
-  - [ ] Push to repository
+- [ ] **21.4** Update todo.md & Git Commit (QR-Code Display Complete)
+  - [ ] Update todo.md to mark section 21 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Implement QR code display and download (Section 21)"
+  - [ ] Git push to main
 
 ---
 
@@ -768,6 +810,12 @@
   - [ ] Tastatur-Navigation (alle Funktionen erreichbar)
   - [ ] Screen Reader Kompatibilität
   - [ ] `prefers-reduced-motion` respektieren
+
+- [ ] **22.8** Update todo.md & Git Commit (Testing Phase Complete)
+  - [ ] Update todo.md to mark section 22 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Complete testing and quality assurance (Section 22)"
+  - [ ] Git push to main
 
 ---
 
@@ -821,6 +869,12 @@
   - [ ] Troubleshooting Guide
   - [ ] Admin Quick Start Guide
 
+- [ ] **23.9** Update todo.md & Git Commit (Deployment Complete)
+  - [ ] Update todo.md to mark section 23 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Complete deployment and DevOps setup (Section 23)"
+  - [ ] Git push to main
+
 ---
 
 ## 24. Documentation
@@ -856,6 +910,12 @@
   - [ ] Seiten erstellen (/impressum, /datenschutz)
   - [ ] Datenschutzhinweis: "Schüler:innen-Daten werden nicht gespeichert"
 
+- [ ] **24.6** Update todo.md & Git Commit (Documentation Complete)
+  - [ ] Update todo.md to mark section 24 complete
+  - [ ] Update implementation status summary
+  - [ ] Git commit with message: "Complete documentation and compliance (Section 24)"
+  - [ ] Git push to main
+
 ---
 
 ## 25. Launch & Pilot
@@ -885,6 +945,13 @@
   - [ ] Email Outreach an Schulen
   - [ ] Demo-Video erstellen
   - [ ] Social Media Präsenz
+
+- [ ] **25.6** Final Release & Git Commit
+  - [ ] Update todo.md to mark sections 25+ complete
+  - [ ] Update implementation status summary with MVP completion date
+  - [ ] Git commit with message: "Complete pilot testing and launch preparation - v1.0.0"
+  - [ ] Git tag v1.0.0 for official release
+  - [ ] Git push to main with tags
 
 ---
 
@@ -936,5 +1003,34 @@
 
 ---
 
-**Status: Initial Draft**
+## Implementation Status Summary (as of 2026-01-26)
+
+### ✅ Completed
+- Backend: All core endpoints, authentication, user/admin management, analytics tracking
+- Frontend: React + Vite + Tailwind setup, Theme system (6 themes), Auth context
+- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage (working!)**
+- Shared Components: Button, Input, Header, Footer, Toast, Loading
+- Student Sorting: Fully functional with keyboard controls (A/S/D, Space, I), progress tracking, overlay with shortcuts
+- API Client: Axios setup with all necessary endpoints for sorting
+
+### 🔄 In Progress
+- Fix remaining API integration issues (mostly resolved, session tracking working)
+- Remove debug console logs after testing
+
+### ⏳ Pending (High Priority)
+1. **Section 13.7-13.9**: User list management pages (LIST OVERVIEW, EDITOR, PROFILE)
+2. **Section 13.10-13.15**: Admin pages (PENDING INBOX, USER MANAGEMENT, ANALYTICS DASHBOARD, etc.)
+3. **Section 15**: Hexagon visualization (DEFERRED - currently showing placeholder in results view)
+4. **Section 16**: localStorage state persistence for session recovery
+5. **Section 20-21**: PDF export UI and QR code display
+
+### ⚠️ Known Limitations
+- No hex visualization yet (placeholder text shown in results view)
+- No PDF rendering implemented
+- No QR code display
+- No Undo functionality (W key)
+- No drag-and-drop (buttons work, drag TBD)
+- State not persisted to localStorage
+
+**Status: MVP Frontend Functional - Core Sorting Works, Admin/Teacher Pages TBD**
 **Last Updated: 2026-01-26**
