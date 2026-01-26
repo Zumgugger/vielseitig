@@ -6,14 +6,18 @@
 
 ## 1. Projekt-Setup & Infrastructure
 
-- [ ] **1.0** Development Environment Setup
+- [x] **1.0** Development Environment Setup
   - [x] WSL als Standard-Terminal in VS Code konfigurieren
   - [x] Python Virtual Environment (.venv) in WSL erstellen
   - [x] pip in .venv installieren
   - [x] .gitignore Datei erstellen
-  - [ ] Sicherstellen dass alle Python-Commands in .venv ausgeführt werden
-  - [ ] requirements.txt erstellen
-  - [ ] Basis-Dependencies installieren (Flask/FastAPI, SQLAlchemy, etc.)
+  - [x] Sicherstellen dass alle Python-Commands in .venv ausgeführt werden
+  - [x] requirements.txt erstellen
+  - [x] Basis-Dependencies installieren (FastAPI, SQLAlchemy, etc.)
+  - [x] Makefile mit dev/test/lint/format commands erstellen
+  - [x] .env.example für Konfiguration erstellen
+  - [x] pyproject.toml und .flake8 für Code-Qualität
+  - [x] Basis Health-Endpoint und Test implementieren
 
 - [ ] **1.1** Docker Compose Konfiguration aufbauen
   - [ ] Docker Compose YAML mit App-Container + SQLite Volume
@@ -315,6 +319,7 @@
   - [ ] Dev Server starten (z.B. `npm run dev`)
   - [ ] Build Script (`npm run build`)
   - [ ] Environment Variables (.env files)
+  - [ ] Backend Dev Server: `make dev` (Port 8000)
 
 ---
 
@@ -676,11 +681,17 @@
 
 ## 22. Testing & Quality Assurance
 
+- [ ] **22.0** Code-Qualität Tools
+  - [x] `make lint` - Code-Stil prüfen (flake8)
+  - [x] `make format` - Code formatieren (black)
+  - [ ] CI/CD Pipeline für automatisches Linting/Testing
+
 - [ ] **22.1** Backend Unit Tests
   - [ ] Auth-Funktionen testen (Login, Passwort-Hash, Session)
   - [ ] Database-Operationen testen (CRUD)
   - [ ] Business Logic testen (Schul-Lizenz, Share-Token, Analytics)
   - [ ] API Endpoint Tests (200, 401, 403, 400 Responses)
+  - [ ] Tests mit `make test` ausführen
 
 - [ ] **22.2** Frontend Unit Tests
   - [ ] Component Tests (React Testing Library oder ähnlich)
