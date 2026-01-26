@@ -136,20 +136,20 @@
 ## 4. Backend – User-Management (Admin)
 
 - [ ] **4.1** Pending Inbox Endpoints
-  - [ ] GET `/admin/pending-users` – Liste ausstehender User
-  - [ ] POST `/admin/users/{userId}/approve` – User aktivieren (status=active)
-  - [ ] POST `/admin/users/{userId}/reject` – User ablehnen
-  - [ ] GET `/admin/pending-schools` – Liste ausstehender Schulen
-  - [ ] POST `/admin/schools/{schoolId}/approve` – Schule aktivieren
-  - [ ] POST `/admin/schools/{schoolId}/reject` – Schule ablehnen
+  - [x] GET `/admin/pending-users` – Liste ausstehender User
+  - [x] POST `/admin/users/{userId}/approve` – User aktivieren (status=active)
+  - [x] POST `/admin/users/{userId}/reject` – User ablehnen
+  - [x] GET `/admin/pending-schools` – Liste ausstehender Schulen
+  - [x] POST `/admin/schools/{schoolId}/approve` – Schule aktivieren
+  - [x] POST `/admin/schools/{schoolId}/reject` – Schule ablehnen
 
 - [ ] **4.2** User CRUD (Admin)
-  - [ ] GET `/admin/users` – alle User
-  - [ ] GET `/admin/users/{userId}` – Einzelheiten
-  - [ ] POST `/admin/users` – neuen User anlegen
-  - [ ] PUT `/admin/users/{userId}` – User bearbeiten
-  - [ ] DELETE `/admin/users/{userId}` – User löschen
-  - [ ] PUT `/admin/users/{userId}/activation` – status/active_until setzen
+  - [x] GET `/admin/users` – alle User
+  - [x] GET `/admin/users/{userId}` – Einzelheiten
+  - [x] POST `/admin/users` – neuen User anlegen
+  - [x] PUT `/admin/users/{userId}` – User bearbeiten
+  - [x] DELETE `/admin/users/{userId}` – User löschen
+  - [x] PUT `/admin/users/{userId}/activation` – status/active_until setzen
 
 - [ ] **4.3** School CRUD (Admin)
   - [ ] GET `/admin/schools` – alle Schulen
@@ -170,13 +170,17 @@
 ## 5. Backend – User-Management (Lehrkraft)
 
 - [ ] **5.1** User-Profil Endpoint
-  - [ ] GET `/user/profile` – aktuelle User-Infos
+  - [x] GET `/user/profile` – aktuelle User-Infos (schon implementiert)
   - [ ] PUT `/user/profile` – Passwort ändern o.ä.
   - [ ] GET `/user/schools` – eigene Schule
 
 - [ ] **5.2** Listen-Übersicht Endpoint
   - [ ] GET `/user/lists` – Standardliste + eigene Custom-Listen + schul-geteilte Listen
   - [ ] Filter nach `is_default`, `owner_user_id`, `share_with_school`
+
+- [ ] **5.3** Git Commit & Push
+  - [ ] Commit teacher user management
+  - [ ] Push to repository
 
 ---
 
