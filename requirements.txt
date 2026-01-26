@@ -1,0 +1,39 @@
+# Core web framework (choose one)
+# flask>=3.0.0
+# fastapi>=0.109.0
+# uvicorn>=0.27.0  # For FastAPI
+
+# Database
+# sqlalchemy>=2.0.0
+# alembic>=1.13.0  # For database migrations
+
+# Authentication & Security
+# bcrypt>=4.1.0
+# python-jose[cryptography]>=3.3.0  # For JWT tokens
+# passlib>=1.7.4
+
+# Environment & Configuration
+# python-dotenv>=1.0.0
+
+# SMS Integration (Twilio)
+# twilio>=8.0.0
+
+# PDF Generation
+# reportlab>=4.0.0
+# weasyprint>=60.0
+# pypdf2>=3.0.0
+
+# QR Code Generation
+# qrcode[pil]>=7.4.0
+
+# HTTP Client (for testing)
+# requests>=2.31.0
+
+# Development & Testing
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0  # Code formatter
+# flake8>=6.0.0  # Linter
+# mypy>=1.0.0    # Type checker
+
+# Add specific versions once you decide on the tech stack

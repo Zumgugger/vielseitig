@@ -6,6 +6,15 @@
 
 ## 1. Projekt-Setup & Infrastructure
 
+- [ ] **1.0** Development Environment Setup
+  - [x] WSL als Standard-Terminal in VS Code konfigurieren
+  - [x] Python Virtual Environment (.venv) in WSL erstellen
+  - [x] pip in .venv installieren
+  - [x] .gitignore Datei erstellen
+  - [ ] Sicherstellen dass alle Python-Commands in .venv ausgeführt werden
+  - [ ] requirements.txt erstellen
+  - [ ] Basis-Dependencies installieren (Flask/FastAPI, SQLAlchemy, etc.)
+
 - [ ] **1.1** Docker Compose Konfiguration aufbauen
   - [ ] Docker Compose YAML mit App-Container + SQLite Volume
   - [ ] Python/Flask oder Node.js Backend-Container
