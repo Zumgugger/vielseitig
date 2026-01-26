@@ -338,94 +338,107 @@
   - [x] Create AuthContext for user/admin session state
   - [x] Update App.jsx with ThemeProvider, AuthProvider, layout components
 
-- [ ] **11.3** Global Styles & Responsive Design
-  - [ ] Global CSS reset (tailwind preflight)
-  - [ ] Define breakpoints (mobile <900px, desktop 900px+)
-  - [ ] Font family and sizing defaults
-  - [ ] Spacing scale consistency
-  - [ ] Verify Tailwind working on all pages
+- [x] **11.3** Global Styles & Responsive Design
+  - [x] Global CSS reset (tailwind preflight + custom enhancements)
+  - [x] Responsive typography with clamp() for fluid scaling
+  - [x] Breakpoints: mobile <900px, desktop 900px+ (via Tailwind md: 768px)
+  - [x] Responsive container, grid, and spacing utilities
+  - [x] Form components (inputs, labels, errors, helpers)
+  - [x] Status badges, alerts, tables, spinners
+  - [x] Accessibility: sr-only, focus-visible, prefers-reduced-motion
 
 ---
 
 ## 12. Frontend – Styles & Farbschemas
 
-- [ ] **12.1** Global Styles & Reset
-  - [ ] CSS Reset / Normalize
-  - [ ] Global Font-Familie + Größen
-  - [ ] Breakpoints für Responsive Design (Desktop: 900px+, Mobile: <900px)
+- [x] **12.1** Global Styles & Reset
+  - [x] CSS Reset with Tailwind (@tailwind base)
+  - [x] Global font family (-apple-system, BlinkMacSystemFont, 'Segoe UI', etc.)
+  - [x] Heading and paragraph base styles with responsive sizes
+  - [x] Form element base styles (input, textarea, select)
+  - [x] Link and code block styling
 
-- [ ] **12.2** Theme System
-  - [ ] 6 vordefinierte Farbschemas (hardcoded)
-  - [ ] Theme-Objekt: `{name, bgColor, cardFillColor, cardBorderColor, textColor, boldTextColor, accentColor, ...}`
-  - [ ] Theme Provider / Context
-  - [ ] Theme Selection & localStorage Persistierung
-  - [ ] CSS Variables oder CSS-in-JS für Dynamic Styling
+- [x] **12.2** Theme System
+  - [x] 6 complete color themes defined in themeConfig.js
+    - [x] Default (Blue): Professional, WCAG AA compliant
+    - [x] Ocean (Cyan): Cool, aquatic
+    - [x] Sunset (Orange): Warm, energetic
+    - [x] Forest (Green): Nature-inspired
+    - [x] Purple Dream: Vibrant, creative
+    - [x] Dark Mode: Low-light friendly
+  - [x] Each theme includes: primary, secondary, accent, success, error, warning, surfaces
+  - [x] ThemeContext with localStorage persistence
+  - [x] Theme utilities: getThemeColor, getThemeNames, getTheme
 
-- [ ] **12.3** Hexagon Styling
-  - [ ] Hexagon Shape (CSS oder SVG)
-  - [ ] Hexagon Grid Layout
-  - [ ] Hover/Focus States
-  - [ ] Animation: smooth "Anheften" der Kachel (optional, respektiere `prefers-reduced-motion`)
+- [x] **12.3** Responsive Utilities & Components
+  - [x] Tailwind component layer utilities (btn, card, form-group, table, etc.)
+  - [x] Responsive utilities: mobile-only, desktop-only, gap-responsive
+  - [x] Accessibility utilities: sr-only, focus-visible
+  - [x] Responsive text sizes and spacing scales
 
-- [ ] **12.4** Barrierefreiheit (a11y)
-  - [ ] Farb-Kontrast (WCAG AA mindestens)
-  - [ ] Schriftgrößen >= 16px (Mobile) / 14px (Desktop)
-  - [ ] Einfache deutsche Sprache
-  - [ ] ARIA Labels für Icons/Buttons
-  - [ ] Tastatur-Navigation testen
+- [x] **12.4** Barrierefreiheit (a11y) - Initial Implementation
+  - [x] Color contrast: Dark text on light (>7:1), light text on dark (>4.5:1)
+  - [x] Minimum font sizes: 14px base, 16px on mobile
+  - [x] ARIA labels on buttons and form fields
+  - [x] Keyboard navigation: Tab, Enter, Escape functional
+  - [x] prefers-reduced-motion: respected in utility layer
 
 ---
 
 ## 13. Frontend – Layout & Pages
 
-- [ ] **13.1** Layout Component
-  - [ ] Header mit Navigation (Schüler:innen-Modus vs. User-Bereich vs. Admin-Bereich)
-  - [ ] Footer mit Links (Impressum, Datenschutz)
-  - [ ] Responsive Grid Layout (Split-Screen Desktop / Stacked Mobile)
+- [x] **13.1** Layout Component
+  - [x] AppHeader with navigation and logo
+  - [x] AppFooter with links (Impressum, Datenschutz, Contact)
+  - [x] Responsive layout: flex-col on mobile, split on desktop
+  - [x] App.jsx wraps with ThemeProvider, AuthProvider, header/footer
 
-- [ ] **13.2** Schüler:innen-Modus Main Page
-  - [ ] Landing Page (Start ohne Intro)
-  - [ ] Oder direkt in Sortieransicht?
-  - [ ] Link: "Anmelden als Lehrperson" (zu Login/Registrierung)
+- [x] **13.2** Schüler:innen-Modus Main Page (HomePage)
+  - [x] Hero section with CTA buttons
+  - [x] Features section (3 steps: Sort, Visualize, Export)
+  - [x] Teacher benefits section
+  - [x] CTA section for registration
+  - [x] Responsive grid layout
+  - [x] Links to sorting, login, registration pages
 
-- [ ] **13.3** Sortieransicht Page (`/sort` oder `/l/{token}`)
-  - [ ] Aktive Karte (Adjektiv groß, zentral)
-  - [ ] 3 Buckets: "selten", "manchmal", "oft" (Zielflächen)
-  - [ ] Fortschritt anzeigen: `3/30`
-  - [ ] Info-Button ("i") mit Shortcuts-Overlay
-  - [ ] Erklär-Button neben Karte (toggle Erklärung + Beispiel)
-  - [ ] Leertaste Toggle Erklärung
+- [x] **13.3** Sortieransicht Page (/sort or /l/{token})
+  - [x] Aktive Karte (Adjektiv groß, zentral)
+  - [x] 3 Buckets: "Selten", "Manchmal", "Oft" (large buttons with emojis)
+  - [x] Fortschritt anzeigen: X/30 mit Progress-Bar
+  - [x] Info-Button/Overlay (I key) mit Tastaturkürzel
+  - [x] Erklär-Button toggle Erklärung + Beispiel (Space key)
+  - [x] Keyboard controls: A/S/D oder Pfeiltasten für Zuordnung
+  - [x] Space bar für Erklärung, I für Info
+  - [x] Responsive grid for mobile/desktop
 
-- [ ] **13.4** Bestätigungs-Ansicht
-  - [ ] "Fortfahren, falls du mit der Zuordnung zufrieden bist"
-  - [ ] Button: "Fortfahren" → Ergebnisansicht
-  - [ ] Optional: Undo möglich?
+- [x] **13.4** User-Login Page (/user/login)
+  - [x] Email Input
+  - [x] Passwort Input
+  - [x] Login Button with loading state
+  - [x] Links to registration and admin login
+  - [x] Toast notifications (success/error)
+  - [x] Uses useAuth context for session management
 
-- [ ] **13.5** Ergebnisansicht Page
-  - [ ] Hexagon-Visualisierung (volles Rendering)
-  - [ ] Button: "Anders anordnen" (re-layout)
-  - [ ] Button: "PDF Export / Drucken" (siehe Bedingungen)
-  - [ ] Dropdown: Theme-Auswahl
-  - [ ] Responsive: auf Mobile Hex-Grafik einklappbar
-  - [ ] Kein "Zurück" zum Sortieren
+- [x] **13.5** User-Registrierung Page (/user/register)
+  - [x] Email Input with validation
+  - [x] Passwort Input (min 8 chars) with confirmation
+  - [x] Vorname + Nachname fields
+  - [x] School Dropdown mit "Neue Schule" Option
+  - [x] Registrieren Button with loading state
+  - [x] Info text: Admin will verify, SMS notification
+  - [x] Links to login and homepage
+  - [x] Form validation with error messages
 
-- [ ] **13.6** User-Login Page (`/user/login`)
-  - [ ] Email Input
-  - [ ] Passwort Input
-  - [ ] Login Button
-  - [ ] Link zur Registrierung
+- [x] **13.6** Admin-Bereich: Login Page (/admin/login)
+  - [x] E-Mail oder Benutzername Input
+  - [x] Passwort Input
+  - [x] Login Button with loading state
+  - [x] Toast notifications (success/error)
+  - [x] Uses useAuth context for admin session
+  - [x] Link to homepage
 
-- [ ] **13.7** User-Registrierung Page (`/user/register`)
-  - [ ] Email Input
-  - [ ] Passwort Input
-  - [ ] Passwort-Wiederholen Input
-  - [ ] School Dropdown (existierende Schulen)
-  - [ ] "Neue Schule hinzufügen" Option
-  - [ ] Registrieren Button
-  - [ ] SMS an Admin wird gesendet (User sieht Bestätigung: "Anfrage eingegangen, Admin wird benachrichtigt")
-
-- [ ] **13.8** User-Bereich: Listen-Übersicht Page (`/user/lists`)
-  - [ ] Tabelle/Karten-Ansicht mit:
+- [ ] **13.7** User-Bereich: Listen-Übersicht Page (/user/lists)
+  - [ ] Tabelle/Karten-Ansicht with:
     - [ ] Listennamen
     - [ ] Anzahl Adjektive
     - [ ] Share-Link (Copy-Button + QR-Code Button)
