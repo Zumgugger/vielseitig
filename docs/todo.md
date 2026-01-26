@@ -169,41 +169,41 @@
 
 ## 5. Backend – User-Management (Lehrkraft)
 
-- [ ] **5.1** User-Profil Endpoint
+- [x] **5.1** User-Profil Endpoint
   - [x] GET `/user/profile` – aktuelle User-Infos (schon implementiert)
-  - [ ] PUT `/user/profile` – Passwort ändern o.ä.
-  - [ ] GET `/user/schools` – eigene Schule
+  - [x] PUT `/user/profile` – Passwort ändern o.ä.
+  - [x] GET `/user/schools` – eigene Schule
 
-- [ ] **5.2** Listen-Übersicht Endpoint
-  - [ ] GET `/user/lists` – Standardliste + eigene Custom-Listen + schul-geteilte Listen
-  - [ ] Filter nach `is_default`, `owner_user_id`, `share_with_school`
+- [x] **5.2** Listen-Übersicht Endpoint
+  - [x] GET `/user/lists` – Standardliste + eigene Custom-Listen + schul-geteilte Listen
+  - [x] Filter nach `is_default`, `owner_user_id`, `share_with_school` (implemented via query logic)
 
-- [ ] **5.3** Git Commit & Push
-  - [ ] Commit teacher user management
-  - [ ] Push to repository
+- [x] **5.3** Git Commit & Push
+  - [x] Commit teacher user management
+  - [x] Push to repository
 
 ---
 
 ## 6. Backend – Listen-Verwaltung
 
-- [ ] **6.1** List CRUD (User)
-  - [ ] POST `/user/lists` – neue Custom-Liste anlegen
-  - [ ] GET `/user/lists/{listId}` – Liste + Adjektive
-  - [ ] PUT `/user/lists/{listId}` – Liste bearbeiten (name, description, share_with_school)
-  - [ ] DELETE `/user/lists/{listId}` – Liste löschen (nur eigene)
+- [x] **6.1** List CRUD (User)
+  - [x] POST `/user/lists` – neue Custom-Liste anlegen
+  - [x] GET `/user/lists/{listId}` – Liste + Adjektive
+  - [x] PUT `/user/lists/{listId}` – Liste bearbeiten (name, description, share_with_school)
+  - [x] DELETE `/user/lists/{listId}` – Liste löschen (nur eigene)
 
-- [ ] **6.2** Share-Token Generation
-  - [ ] Kryptographisch zufälliger Token generieren (z.B. `secrets.token_urlsafe()` Python)
-  - [ ] Token in `lists.share_token` speichern
-  - [ ] URL-Format: `/l/{token}`
-  - [ ] Gültigkeit: 1 Jahr von Erstellung (in `share_expires_at`)
+- [x] **6.2** Share-Token Generation
+  - [x] Kryptographisch zufälliger Token generieren (z.B. `secrets.token_urlsafe()` Python)
+  - [x] Token in `lists.share_token` speichern
+  - [x] URL-Format: `/l/{token}`
+  - [x] Gültigkeit: 1 Jahr von Erstellung (in `share_expires_at`)
 
-- [ ] **6.3** Adjektiv CRUD (User, Inline Editing)
-  - [ ] GET `/user/lists/{listId}/adjectives` – alle Adjektive einer Liste
-  - [ ] POST `/user/lists/{listId}/adjectives` – neues Adjektiv hinzufügen
-  - [ ] PUT `/user/lists/{listId}/adjectives/{adjectiveId}` – Adjektiv bearbeiten (word, explanation, example, order_index)
-  - [ ] DELETE `/user/lists/{listId}/adjectives/{adjectiveId}` – Adjektiv löschen
-  - [ ] Berechtigungsprüfung: nur Owner oder Schul-Admin
+- [x] **6.3** Adjektiv CRUD (User, Inline Editing)
+  - [x] GET `/user/lists/{listId}/adjectives` – alle Adjektive einer Liste
+  - [x] POST `/user/lists/{listId}/adjectives` – neues Adjektiv hinzufügen
+  - [x] PUT `/user/lists/{listId}/adjectives/{adjectiveId}` – Adjektiv bearbeiten (word, explanation, example, order_index)
+  - [x] DELETE `/user/lists/{listId}/adjectives/{adjectiveId}` – Adjektiv löschen
+  - [x] Berechtigungsprüfung: nur Owner oder Schul-Admin
 
 - [ ] **6.4** Copy-on-Write für Schul-geteilte Listen
   - [ ] Wenn User eine schul-geteilte Liste bearbeitet, automatisch Fork erstellen
@@ -212,11 +212,11 @@
   - [ ] UI-Hinweis: "Du bearbeitest eine Kopie"
   - [ ] Original-Liste bleibt unverändert
 
-- [ ] **6.5** Standardliste (Admin-only Editing)
-  - [ ] GET `/admin/standard-list` – Standardliste + Adjektive
-  - [ ] PUT `/admin/standard-list/{adjectiveId}` – Adjektiv bearbeiten (Inline Auto-Save)
-  - [ ] DELETE `/admin/standard-list/{adjectiveId}` – Adjektiv aus Standard-Liste entfernen
-  - [ ] Daten geben auch an Frontend (für Inline Editing)
+- [x] **6.5** Standardliste (Admin-only Editing)
+  - [x] GET `/admin/standard-list` – Standardliste + Adjektive
+  - [x] PUT `/admin/standard-list/{adjectiveId}` – Adjektiv bearbeiten (Inline Auto-Save)
+  - [x] DELETE `/admin/standard-list/{adjectiveId}` – Adjektiv aus Standard-Liste entfernen
+  - [x] Daten geben auch an Frontend (für Inline Editing)
 
 - [ ] **6.6** Git Commit & Push
   - [ ] Commit user management and list management
