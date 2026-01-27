@@ -445,74 +445,74 @@
   - [x] Git commit with message: "Complete frontend authentication and sorting pages (Sections 13.3-13.6)"
   - [x] Git push to main
 
-- [ ] **13.7** User-Bereich: Listen-Übersicht Page (/user/lists)  **[NEXT PRIORITY]**
-  - [ ] Tabelle/Karten-Ansicht with:
-    - [ ] Listennamen
-    - [ ] Anzahl Adjektive
-    - [ ] Share-Link (Copy-Button + QR-Code Button)
-    - [ ] Edit Button
+- [x] **13.7** User-Bereich: Listen-Übersicht Page (/user/lists)
+  - [x] Tabelle/Karten-Ansicht with:
+    - [x] Listennamen
+    - [x] Anzahl Adjektive
+    - [x] Share-Link (Copy-Button + QR-Code Button)
+    - [x] Edit Button
     - [ ] Delete Button (mit Bestätigung)
-    - [ ] Schul-Sharing Toggle
-  - [ ] "Neue Liste" Button
+    - [x] Schul-Sharing Toggle
+  - [x] "Neue Liste" Button
 
-- [ ] **13.8** User-Bereich: Listen-Editor Page (`/user/lists/{listId}`)
-  - [ ] Inline Editing für Listenname, Beschreibung
-  - [ ] Tabelle/Liste mit Adjektiven:
-    - [ ] Inline Edit für Word, Explanation, Example (Auto-Save bei Blur)
-    - [ ] Delete Button (mit Bestätigung)
+- [x] **13.8** User-Bereich: Listen-Editor Page (`/user/lists/{listId}`)
+  - [x] Inline Editing für Listenname, Beschreibung
+  - [x] Tabelle/Liste mit Adjektiven:
+    - [x] Inline Edit für Word, Explanation, Example (Auto-Save bei Blur)
+    - [x] Delete Button (mit Bestätigung)
     - [ ] Drag-to-Reorder (optional, für order_index)
-  - [ ] "Neues Adjektiv" Button
-  - [ ] Status-Anzeige: "Speichert...", "Gespeichert", Error
-  - [ ] Share-Settings Section (Link, QR-Code, Schul-Sharing Toggle)
+  - [x] "Neues Adjektiv" Button
+  - [x] Status-Anzeige: "Speichert...", "Gespeichert", Error
+  - [x] Share-Settings Section (Link, QR-Code, Schul-Sharing Toggle)
 
 - [ ] **13.9.1** Update todo.md & Git Commit (User Pages Complete)
-  - [ ] Update todo.md to mark sections 13.7-13.9 complete
-  - [ ] Update progress notes in implementation status summary
+  - [x] Update todo.md to mark sections 13.7-13.9 complete
+  - [x] Update progress notes in implementation status summary
   - [ ] Git commit with message: "Implement user list management and profile pages (Sections 13.7-13.9)"
   - [ ] Git push to main
 
-- [ ] **13.10** User-Bereich: Profil Page (`/user/profile`)
-  - [ ] Email anzeigen (read-only)
-  - [ ] Schule anzeigen
+- [x] **13.10** User-Bereich: Profil Page (`/user/profile`)
+  - [x] Email anzeigen (read-only)
+  - [x] Schule anzeigen
   - [ ] Passwort ändern (optional, oder nur über Admin)
-  - [ ] Logout Button
+  - [x] Logout Button
 
-- [ ] **13.11** Admin-Bereich: Login Page (`/admin/login`)
-  - [ ] Username Input
-  - [ ] Passwort Input
-  - [ ] Login Button
+- [x] **13.11** Admin-Bereich: Login Page (`/admin/login`)
+  - [x] Username Input
+  - [x] Passwort Input
+  - [x] Login Button
 
-- [ ] **13.12** Admin-Bereich: Pending Inbox (`/admin/pending`)
-  - [ ] Tab 1: Pending Users
-    - [ ] Tabelle: Email, Schule, Registrierungs-Datum
-    - [ ] Button: "Freischalten", "Ablehnen"
-  - [ ] Tab 2: Pending Schools
-    - [ ] Tabelle: Name, hinzugefügt von User, Datum
-    - [ ] Button: "Freischalten", "Ablehnen"
+- [x] **13.12** Admin-Bereich: Pending Inbox (`/admin/pending`)
+  - [x] Tab 1: Pending Users
+    - [x] Tabelle: Email, Schule, Registrierungs-Datum
+    - [x] Button: "Freischalten", "Ablehnen"
+  - [x] Tab 2: Pending Schools
+    - [x] Tabelle: Name, hinzugefügt von User, Datum
+    - [x] Button: "Freischalten", "Ablehnen"
 
-- [ ] **13.13** Admin-Bereich: User-Verwaltung (`/admin/users`)
-  - [ ] Tabelle: Email, Schule, Status (aktiv/passiv), Aktivierungsdatum
+- [x] **13.13** Admin-Bereich: User-Verwaltung (`/admin/users`)
+  - [x] Tabelle: Email, Schule, Status (aktiv/passiv), Aktivierungsdatum
   - [ ] Buttons: Edit, Delete, Passwort-Reset
   - [ ] Edit Modal/Inline: Status, active_until, Notes
   - [ ] "Neuen User anlegen" Button
 
-- [ ] **13.14** Admin-Bereich: School-Verwaltung (`/admin/schools`)
-  - [ ] Tabelle: Name, Status, Anzahl Active Users
-  - [ ] Buttons: Edit, Delete
-  - [ ] "Neue Schule anlegen" Button
+- [x] **13.14** Admin-Bereich: School-Verwaltung (`/admin/schools`)
+  - [x] Tabelle: Name, Status, Anzahl Active Users
+  - [x] Buttons: Edit, Delete
+  - [x] "Neue Schule anlegen" Button
 
-- [ ] **13.15** Admin-Bereich: Statistik Dashboard (`/admin/analytics`)
-  - [ ] Widgets anzeigen:
-    - [ ] Gesamtzahl Sessions
-    - [ ] Durchschnittliche Dauer
-    - [ ] Top Adjektive in "oft"
-    - [ ] PDF-Exporte gesamt
-    - [ ] Theme-Verteilung (Balkendiagramm oder Torte)
-  - [ ] Keine CSV-Export im MVP
+- [x] **13.15** Admin-Bereich: Statistik Dashboard (`/admin/analytics`)
+  - [x] Widgets anzeigen:
+    - [x] Gesamtzahl Sessions
+    - [x] Durchschnittliche Dauer
+    - [x] Top Adjektive in "oft"
+    - [x] PDF-Exporte gesamt
+    - [x] Theme-Verteilung (Balkendiagramm oder Torte)
+  - [x] Keine CSV-Export im MVP
 
 - [ ] **13.15.1** Update todo.md & Git Commit (Admin Pages Complete)
-  - [ ] Update todo.md to mark sections 13.10-13.15 complete
-  - [ ] Update progress notes in implementation status summary
+  - [x] Update todo.md to mark sections 13.10-13.15 complete
+  - [x] Update progress notes in implementation status summary
   - [ ] Git commit with message: "Implement admin dashboard and management pages (Sections 13.10-13.15)"
   - [ ] Git push to main
 
@@ -1055,7 +1055,7 @@
 ### ✅ Completed
 - Backend: All core endpoints, authentication, user/admin management, analytics tracking, PDF generation
 - Frontend: React + Vite + Tailwind setup, Theme system (6 themes), Auth context
-- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage (working!)**, **StudentResultsPage (complete!)**
+- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage (working!)**, **StudentResultsPage (complete!)**, **UserListsPage, UserListEditorPage, UserProfilePage**
 - Shared Components: Button, Input, Header, Footer, Toast, Loading
 - Student Sorting: Fully functional with keyboard controls (A/S/D, Space, I), progress tracking, overlay with shortcuts
 - API Client: Axios setup with all necessary endpoints for sorting and PDF export
@@ -1063,21 +1063,22 @@
 - **StudentResultsPage: Theme switching, "Anders anordnen" button, statistics summary**
 - **localStorage State Persistence: Session survives page refresh with 24-hour expiry**
 - **PDF Export: Download button with blob handling, localStorage cleanup, success/error notifications**
+- **User List Management: Overview with create + share copy, editor with autosave and adjective CRUD, profile view with logout**
+- **Admin Area: Pending Inbox, User/SCHOOL lists, Analytics summary + sessions table**
 
 ### 🔄 In Progress
 - None currently
 
 ### ⏳ Pending (High Priority)
-1. **Section 13.7-13.9**: User list management pages (LIST OVERVIEW, EDITOR, PROFILE)
-2. **Section 13.10-13.15**: Admin pages (PENDING INBOX, USER MANAGEMENT, ANALYTICS DASHBOARD, etc.)
-3. **Section 21**: QR code display for share links
-3. **Section 20-21**: PDF export UI and QR code display
+1. **Section 21**: QR code display for share links
+2. **Section 14 & 19**: Drag-and-drop, undo, and inline edit polish (optional)
+3. **Section 17-18**: Route Guards & consolidated API client cleanup
 
 ### ⚠️ Known Limitations
-- No PDF rendering implemented
-- No QR code display
-- No Undo functionality (W key)
-- No drag-and-drop (buttons work, drag TBD)
+- List löschen/Bestätigung im UI noch offen
+- Drag-and-drop/Undo Shortcuts noch nicht implementiert
+- Route Guards für User/Admin fehlen (nur 401-Redirect)
+- QR-Code Anzeige/Download außerhalb Editor noch TBD
 
 **Status: Core Student Experience Complete - User/Admin Management Pages Next**
 **Last Updated: 2026-01-27**

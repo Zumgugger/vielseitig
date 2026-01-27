@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, HexagonGrid, Loading, Toast } from '../components';
 import { useTheme } from '../store/ThemeContext';
 import { studentApi } from '../api';
+import html2canvas from 'html2canvas';
 
 /**
  * Student Results Page
@@ -16,6 +17,8 @@ export default function StudentResultsPage() {
   const navigate = useNavigate();
   const { token } = useParams();
   const { currentTheme, switchTheme, allThemeNames } = useTheme();
+  const resultsRef = useRef(null);
+  const hexRef = useRef(null);
 
   // Map theme names for hex visualization (simplified color mapping)
   const hexThemeMap = {
@@ -110,10 +113,32 @@ export default function StudentResultsPage() {
       return;
     }
 
+    const target = hexRef.current || resultsRef.current;
+
+    if (!target) {
+      setToast({
+        show: true,
+        message: 'Export-Container nicht gefunden',
+        type: 'error'
+      });
+      return;
+    }
+
     setIsExportingPdf(true);
     try {
-      // Call PDF export API - returns blob
-      const response = await studentApi.exportPDF(sessionData.sessionId);
+      // Capture only the hex grid card as PNG (WYSIWYG)
+      const canvas = await html2canvas(target, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      });
+
+      const imageDataUrl = canvas.toDataURL('image/png');
+
+      // Call PDF export API with snapshot
+      const response = await studentApi.exportPDF(sessionData.sessionId, {
+        image_data_url: imageDataUrl,
+      });
       
       // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -152,7 +177,7 @@ export default function StudentResultsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto" ref={resultsRef}>
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -214,7 +239,7 @@ export default function StudentResultsPage() {
         </div>
 
         {/* Hexagon Visualization */}
-        <div className="card bg-white p-8">
+        <div className="card bg-white p-8" ref={hexRef}>
           <HexagonGrid
             oftCards={oftCards}
             manchmalCards={manchmalCards}

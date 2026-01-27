@@ -81,8 +81,8 @@ export const studentAPI = {
     api.post(`/api/sessions/${sessionId}/record-assignment`, data),
   
   // PDF export
-  exportPDF: (sessionId) => 
-    api.post(`/api/sessions/${sessionId}/pdf`, {}, { responseType: 'blob' }),
+  exportPDF: (sessionId, data) => 
+    api.post(`/api/sessions/${sessionId}/pdf`, data, { responseType: 'blob' }),
 };
 
 // Alias with camelCase used across pages

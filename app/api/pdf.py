@@ -1,34 +1,29 @@
-"""PDF export of student sorting assignments with hexagon visualization."""
+"""PDF export of student sorting assignments using front-end snapshot (WYSIWYG)."""
+import base64
 import io
-from typing import List
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_session
-from app.models.analytics import AnalyticsSession, AnalyticsAssignment
-from app.models.adjective import Adjective
+from app.models.analytics import AnalyticsSession
 from app.models.list import List as ListModel
-from app.services.analytics import ALLOWED_BUCKETS, mark_pdf_export, record_assignment as record_assignment_service
+from app.services.analytics import mark_pdf_export, record_assignment as record_assignment_service
 
 
 router = APIRouter(prefix="/api/sessions", tags=["pdf"])
 
 
-class PDFExportRequest(BaseModel):
-    session_id: str
-    include_hexagon: bool = True
+class PDFSnapshotRequest(BaseModel):
+    image_data_url: str
 
 
 class AssignmentRecordRequest(BaseModel):
@@ -36,190 +31,104 @@ class AssignmentRecordRequest(BaseModel):
     bucket: str
 
 
-def draw_hexagon(c, x, y, size=1.5, text="", fill=True):
-    """Draw a hexagon at position (x, y) with optional text."""
-    import math
-    
-    angle_offset = math.pi / 6  # 30 degrees
-    points = []
-    for i in range(6):
-        angle = i * math.pi / 3 + angle_offset
-        px = x + size * math.cos(angle)
-        py = y + size * math.sin(angle)
-        points.append((px, py))
-    
-    # Draw hexagon
-    if fill:
-        c.setFillColor(colors.lightgrey)
-    c.setStrokeColor(colors.black)
-    c.setLineWidth(0.5)
-    
-    path = c.beginPath()
-    path.moveTo(points[0][0], points[0][1])
-    for p in points[1:]:
-        path.lineTo(p[0], p[1])
-    path.close()
-    c.drawPath(path, stroke=1, fill=fill)
-    
-    # Draw text if provided
-    if text:
-        c.setFont("Helvetica-Bold", 8)
-        c.drawCentredString(x, y - 0.3, text)
-
-
-BUCKET_ORDER = tuple(name for name in ("selten", "manchmal", "oft") if name in ALLOWED_BUCKETS)
-
-
 @router.post("/{sessionId}/pdf")
 async def export_session_pdf(
     sessionId: str,
-    db: AsyncSession = Depends(get_session)
+    payload: PDFSnapshotRequest,
+    db: AsyncSession = Depends(get_session),
 ):
-    """
-    Export student sorting session as PDF with hexagon visualization.
-    
-    Creates PDF showing sorted adjectives and visual hexagon representation.
-    """
-    # Get session
+    """Export the current session using a front-end snapshot (WYSIWYG)."""
+
+    # Session and list lookup
     session_result = await db.execute(
         select(AnalyticsSession).where(AnalyticsSession.id == sessionId)
     )
     session = session_result.scalar_one_or_none()
-    
     if not session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found"
+            detail="Session not found",
         )
-    
-    # Get list
+
     list_result = await db.execute(
         select(ListModel).where(ListModel.id == session.list_id)
     )
     list_obj = list_result.scalar_one_or_none()
-    
     if not list_obj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="List not found"
+            detail="List not found",
         )
-    
-    # Get assignments for session
-    assignments_result = await db.execute(
-        select(AnalyticsAssignment)
-        .where(AnalyticsAssignment.session_id == sessionId)
-        .order_by(AnalyticsAssignment.bucket)
-    )
-    assignments = assignments_result.scalars().all()
 
-    adjectives_result = await db.execute(
-        select(Adjective).where(Adjective.list_id == session.list_id)
-    )
-    adjectives_by_id = {adj.id: adj for adj in adjectives_result.scalars()}
-    
-    # Group by bucket
-    buckets = {}
-    for assignment in assignments:
-        if assignment.bucket not in buckets:
-            buckets[assignment.bucket] = []
-        buckets[assignment.bucket].append(assignment)
-    
-    # Create PDF
+    if not payload.image_data_url or not payload.image_data_url.startswith("data:image/"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="image_data_url is required and must be a data URL",
+        )
+
+    # Decode data URL (expected PNG from front-end screenshot)
+    try:
+        header, b64data = payload.image_data_url.split(",", 1)
+        image_bytes = base64.b64decode(b64data)
+    except Exception as exc:  # pragma: no cover - defensive
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="image_data_url could not be decoded",
+        ) from exc
+
+    # Prepare PDF (landscape per WYSIWYG request)
     pdf_buffer = io.BytesIO()
-    doc = SimpleDocTemplate(pdf_buffer, pagesize=A4)
-    
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        textColor=colors.HexColor('#1f77b4'),
-        spaceAfter=30,
-        alignment=TA_CENTER
-    )
-    
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=14,
-        textColor=colors.HexColor('#333333'),
-        spaceAfter=12,
-        alignment=TA_LEFT
-    )
-    
-    elements = []
-    
-    # Title
-    elements.append(Paragraph("Vielseitig – Sortierergebnis", title_style))
-    
-    # List info
-    info_text = f"<b>Liste:</b> {list_obj.name}<br/>"
-    if list_obj.description:
-        info_text += f"<b>Beschreibung:</b> {list_obj.description}<br/>"
-    info_text += f"<b>Datum:</b> {session.started_at.strftime('%d.%m.%Y %H:%M')}"
-    
-    elements.append(Paragraph(info_text, styles['Normal']))
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # Results by bucket
-    if buckets:
-        elements.append(Paragraph("Sortierergebnisse nach Kategorie", heading_style))
+    page_width, page_height = landscape(A4)
+    margin = 1.5 * cm
+    footer_space = 1.0 * cm
+    content_width = page_width - 2 * margin
+    content_height = page_height - 2 * margin - footer_space
 
-        for bucket_name in BUCKET_ORDER:
-            if bucket_name not in buckets:
-                continue
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
 
-            bucket_assignments = buckets[bucket_name]
-            elements.append(Paragraph(f"<b>{bucket_name.capitalize()}</b>", styles['Normal']))
+    image = ImageReader(io.BytesIO(image_bytes))
+    img_width, img_height = image.getSize()
+    img_ratio = img_width / img_height
+    box_ratio = content_width / content_height
 
-            table_data = []
-            for assignment in bucket_assignments:
-                adj = adjectives_by_id.get(assignment.adjective_id)
-                if adj:
-                    table_data.append([
-                        Paragraph(f"<b>{adj.word}</b>", styles['Normal']),
-                        Paragraph(adj.explanation or "", styles['Normal'])
-                    ])
-
-            if table_data:
-                table = Table(
-                    table_data,
-                    colWidths=[3*cm, 12*cm]
-                )
-                table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, -1), colors.lightgrey),
-                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 10),
-                    ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.grey)
-                ]))
-
-                elements.append(table)
-
-            elements.append(Spacer(1, 0.3*cm))
+    if img_ratio >= box_ratio:
+        draw_width = content_width
+        draw_height = content_width / img_ratio
     else:
-        elements.append(Paragraph("Keine Sortierergebnisse vorhanden", styles['Normal']))
-    
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # Footer
-    footer_text = f"Exportiert: {datetime.utcnow().strftime('%d.%m.%Y %H:%M:%S UTC')}"
-    elements.append(Paragraph(f"<i>{footer_text}</i>", styles['Normal']))
-    
-    # Build PDF
-    doc.build(elements)
+        draw_height = content_height
+        draw_width = content_height * img_ratio
+
+    x = (page_width - draw_width) / 2
+    y = (page_height - footer_space - draw_height) / 2 + footer_space / 2
+
+    c.drawImage(
+        image,
+        x,
+        y,
+        width=draw_width,
+        height=draw_height,
+        preserveAspectRatio=True,
+        mask="auto",
+    )
+
+    # Footer date (spec: DD.MM.YYYY)
+    c.setFont("Helvetica", 9)
+    c.drawCentredString(
+        page_width / 2,
+        margin / 2,
+        datetime.utcnow().strftime("%d.%m.%Y"),
+    )
+
+    c.showPage()
+    c.save()
     pdf_buffer.seek(0)
-    
-    # Mark session as exported
+
     await mark_pdf_export(db, session_id=sessionId)
-    
-    # Return PDF
-    return FileResponse(
+
+    return StreamingResponse(
         pdf_buffer,
         media_type="application/pdf",
-        filename=f"vielseitig_session_{sessionId[:8]}.pdf"
+        headers={"Content-Disposition": "attachment; filename=\"ich-bin-vielseitig.pdf\""},
     )
 
 

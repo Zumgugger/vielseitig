@@ -11,10 +11,16 @@ export default function AppHeader() {
           <Link to="/" className="text-gray-600 hover:text-gray-900 font-medium">
             Home
           </Link>
+          <Link to="/user/lists" className="text-gray-600 hover:text-gray-900 font-medium">
+            Listen
+          </Link>
+          <Link to="/user/profile" className="text-gray-600 hover:text-gray-900 font-medium">
+            Profil
+          </Link>
           <Link to="/user/login" className="text-gray-600 hover:text-gray-900 font-medium">
             Lehrkraft
           </Link>
-          <Link to="/admin/login" className="text-gray-600 hover:text-gray-900 font-medium">
+          <Link to="/admin/pending" className="text-gray-600 hover:text-gray-900 font-medium">
             Admin
           </Link>
         </nav>
