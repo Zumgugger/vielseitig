@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Toast } from '../components';
-import { authApi } from '../api/client';
+import { authAPI } from '../api';
 import { useAuth } from '../store/AuthContext';
 
 export default function UserRegisterPage() {
@@ -68,13 +68,11 @@ export default function UserRegisterPage() {
     try {
       const schoolName = newSchool || formData.school;
       
-      const response = await authApi.registerUser(
-        formData.email,
-        formData.password,
-        formData.firstName,
-        formData.lastName,
-        schoolName
-      );
+      const response = await authAPI.userRegister({
+        email: formData.email,
+        password: formData.password,
+        school_name: schoolName,
+      });
 
       setToast({
         message: 'Registrierung erfolgreich! Admin wird benachrichtigt.',

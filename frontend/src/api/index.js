@@ -61,6 +61,21 @@ export const listsAPI = {
     api.get(`/user/lists/${listId}/qr`, { responseType: 'blob' }),
 };
 
+export const analyticsAPI = {
+  // Session lifecycle
+  startSession: (listId, themeId) =>
+    api.post('/api/analytics/session/start', { list_id: listId || null, theme_id: themeId || null }),
+
+  recordAssignment: (sessionId, adjectiveId, bucket) =>
+    api.post('/api/analytics/assignment', { analytics_session_id: sessionId, adjective_id: adjectiveId, bucket }),
+
+  finishSession: (sessionId) =>
+    api.post('/api/analytics/session/finish', { analytics_session_id: sessionId }),
+
+  exportPdf: (sessionId, schoolName) =>
+    api.post('/api/analytics/session/pdf-export', { analytics_session_id: sessionId, school_name: schoolName }),
+};
+
 export const studentAPI = {
   // Get adjectives for sorting
   getDefaultAdjectives: () => 
@@ -68,25 +83,15 @@ export const studentAPI = {
   
   getListAdjectives: (listId) => 
     api.get(`/api/lists/${listId}/adjectives`),
-  
-  // Session management
-  createSession: (listId) => 
-    api.post(`/api/lists/${listId}/session`),
-  
-  finishSession: (listId, sessionId) => 
-    api.put(`/api/lists/${listId}/session/${sessionId}`),
-  
-  // Record assignment
-  recordAssignment: (sessionId, data) => 
-    api.post(`/api/sessions/${sessionId}/record-assignment`, data),
-  
-  // PDF export
+
+  // PDF export (aliased for backward compatibility)
   exportPDF: (sessionId, data) => 
     api.post(`/api/sessions/${sessionId}/pdf`, data, { responseType: 'blob' }),
 };
 
-// Alias with camelCase used across pages
+// Aliases for backward compatibility
 export const studentApi = studentAPI;
+export const analyticsApi = analyticsAPI;
 
 export const shareAPI = {
   // Public share endpoints
@@ -95,7 +100,13 @@ export const shareAPI = {
   
   getDefaultList: () => 
     api.get('/l'),
+
+  getPublicList: (token) =>
+    api.get(`/l/${token}`),
 };
+
+// Alias for backward compatibility
+export const shareApi = shareAPI;
 
 export const adminAPI = {
   // Pending inbox

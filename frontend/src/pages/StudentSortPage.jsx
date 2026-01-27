@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Loading, Toast, HexagonGrid } from '../components';
-import { analyticsApi, studentApi, shareApi } from '../api/client';
+import { analyticsApi, studentApi, shareApi } from '../api';
 import { useTheme } from '../store/ThemeContext';
 
 /**

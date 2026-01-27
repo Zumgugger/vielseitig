@@ -533,35 +533,35 @@
 
 ## 14. Frontend – Schüler:innen-Modus Interaktion
 
-- [ ] **14.1** Karten-Drag-and-Drop
+- [ ] **14.1** Karten-Drag-and-Drop (optional)
   - [ ] Aktive Karte kann per Maus auf Bucket gezogen werden
   - [ ] Visuelles Feedback während Drag (Highlighting, Cursor Change)
   - [ ] Drop auf Bucket = Zuordnung
 
-- [ ] **14.2** Tastatur-Steuerung
-  - [ ] `A` oder `ArrowLeft` = "selten"
-  - [ ] `S` oder `ArrowDown` = "manchmal"
-  - [ ] `D` oder `ArrowRight` = "oft"
-  - [ ] `W` oder `ArrowUp` = Undo (letzte Zuordnung rückgängig)
-  - [ ] `Space` = Toggle Erklärung + Beispiel für aktuelle Karte
-  - [ ] Fokus auf aktive Karte automatisch setzen
+- [x] **14.2** Tastatur-Steuerung
+  - [x] `A` oder `ArrowLeft` = "selten"
+  - [x] `S` oder `ArrowDown` = "manchmal"
+  - [x] `D` oder `ArrowRight` = "oft"
+  - [ ] `W` oder `ArrowUp` = Undo (letzte Zuordnung rückgängig) (optional)
+  - [x] `Space` = Toggle Erklärung + Beispiel für aktuelle Karte
+  - [x] Fokus auf aktive Karte automatisch setzen
 
-- [ ] **14.3** Touch/Mobile Steuerung
-  - [ ] Swipe-Gesten (optional, für besseres Mobile UX)
-  - [ ] Tap auf Bucket oder Button = Zuordnung
-  - [ ] Erklär-Button größer/sichtbarer auf Mobile
+- [x] **14.3** Touch/Mobile Steuerung
+  - [x] Swipe-Gesten (optional, für besseres Mobile UX)
+  - [x] Tap auf Bucket oder Button = Zuordnung
+  - [x] Erklär-Button größer/sichtbarer auf Mobile
 
-- [ ] **14.4** Undo Funktion
+- [ ] **14.4** Undo Funktion (optional)
   - [ ] Stack der Zuordnungen speichern (in localStorage)
   - [ ] Undo: letzte Zuordnung entfernen, Karte zurück in "zu sortieren"
   - [ ] Mehrfach Undo möglich
   - [ ] Redo nicht notwendig (MVP)
 
-- [ ] **14.5** Shortcuts-Overlay / Info-Button
-  - [ ] Erstes Laden: Overlay mit Shortcuts anzeigen
-  - [ ] Button "i" zum Erneut-Anzeigen
-  - [ ] Inhalt: "A/S/D oder Pfeile zum Sortieren, W zum Rückgängigmachen, Space für Erklärung"
-  - [ ] Click/Escape zum Schließen
+- [x] **14.5** Shortcuts-Overlay / Info-Button
+  - [x] Erstes Laden: Overlay mit Shortcuts anzeigen
+  - [x] Button "i" zum Erneut-Anzeigen
+  - [x] Inhalt: "A/S/D oder Pfeile zum Sortieren, W zum Rückgängigmachen, Space für Erklärung"
+  - [x] Click/Escape zum Schließen
 
 ---
 
@@ -679,26 +679,26 @@
 
 ## 17. Frontend – API Client
 
-- [ ] **17.1** HTTP Client Setup
-  - [ ] axios oder fetch Wrapper
-  - [ ] Basis-URL konfigurieren
-  - [ ] Error Handling (401, 403, 500 etc.)
-  - [ ] CORS Handling
+- [x] **17.1** HTTP Client Setup
+  - [x] axios oder fetch Wrapper
+  - [x] Basis-URL konfigurieren
+  - [x] Error Handling (401, 403, 500 etc.)
+  - [x] CORS Handling
 
-- [ ] **17.2** API Endpoints für Schüler:innen-Modus
-  - [ ] GET /api/lists/{listId}/adjectives
-  - [ ] GET /api/lists/default/adjectives
-  - [ ] POST /api/analytics/session/start
-  - [ ] POST /api/analytics/assignment
-  - [ ] POST /api/analytics/session/finish
-  - [ ] POST /api/analytics/session/pdf-export
-  - [ ] POST /api/export/pdf
+- [x] **17.2** API Endpoints für Schüler:innen-Modus
+  - [x] GET /api/lists/{listId}/adjectives
+  - [x] GET /api/lists/default/adjectives
+  - [x] POST /api/analytics/session/start
+  - [x] POST /api/analytics/assignment
+  - [x] POST /api/analytics/session/finish
+  - [x] POST /api/analytics/session/pdf-export
+  - [x] POST /api/export/pdf
 
-- [ ] **17.3** API Endpoints für User-Bereich
-  - [ ] Alle User/List CRUD Endpoints (siehe Backend 5, 6)
+- [x] **17.3** API Endpoints für User-Bereich
+  - [x] Alle User/List CRUD Endpoints (siehe Backend 5, 6)
 
-- [ ] **17.4** API Endpoints für Admin-Bereich
-  - [ ] Alle Admin Endpoints (siehe Backend 4, 10)
+- [x] **17.4** API Endpoints für Admin-Bereich
+  - [x] Alle Admin Endpoints (siehe Backend 4, 10)
 
 ---
 
@@ -725,26 +725,26 @@
 
 ## 19. Frontend – Inline Editing & Auto-Save
 
-- [ ] **19.1** Inline Edit Components
-  - [ ] Editable Text Field (contentEditable oder Input)
-  - [ ] Editable Textarea (explanation, example)
-  - [ ] Editable Dropdown (school selection, theme)
+- [x] **19.1** Inline Edit Components
+  - [x] Editable Text Field (contentEditable oder Input)
+  - [x] Editable Textarea (explanation, example)
+  - [x] Editable Dropdown (school selection, theme)
 
-- [ ] **19.2** Auto-Save Mechanism
-  - [ ] Debounce-Timer bei Input (z.B. 500ms)
-  - [ ] OnBlur (sofort speichern)
-  - [ ] POST/PUT Request an Backend
-  - [ ] Status-Anzeige: "Speichert...", "Gespeichert ✓", Error-Meldung
+- [x] **19.2** Auto-Save Mechanism
+  - [x] Debounce-Timer bei Input (z.B. 500ms)
+  - [x] OnBlur (sofort speichern)
+  - [x] POST/PUT Request an Backend
+  - [x] Status-Anzeige: "Speichert...", "Gespeichert ✓", Error-Meldung
 
-- [ ] **19.3** Error Handling bei Save
-  - [ ] Fehlermeldung unter Feld anzeigen
-  - [ ] "Erneut versuchen" Button
-  - [ ] Lokale Änderung behalten (nicht verwerfen)
+- [x] **19.3** Error Handling bei Save
+  - [x] Fehlermeldung unter Feld anzeigen
+  - [x] "Erneut versuchen" Button
+  - [x] Lokale Änderung behalten (nicht verwerfen)
 
-- [ ] **19.4** Optimistic Updates
-  - [ ] UI zeigt Änderung sofort (optimistic)
-  - [ ] Backend speichert im Hintergrund
-  - [ ] Bei Fehler: Änderung zurücknehmen + Error anzeigen
+- [x] **19.4** Optimistic Updates
+  - [x] UI zeigt Änderung sofort (optimistic)
+  - [x] Backend speichert im Hintergrund
+  - [x] Bei Fehler: Änderung zurücknehmen + Error anzeigen
 
 ---
 
@@ -1067,20 +1067,23 @@
 - **Admin Area: Pending Inbox, User/SCHOOL lists, Analytics summary + sessions table**
 - **QR Codes: Backend generation + UI preview/download in list overview and editor**
 - **Auth Guards: Session validation on app load, protected admin/user routes, unified login handling**
+- **API Client: Consolidated endpoints with analytics, student, share, admin, and auth APIs**
+- **Keyboard Controls: Full A/S/D shortcuts, Space for explanation, I for info overlay**
+- **Inline Editing: Auto-save with debounce, optimistic updates, error handling**
 
 ### 🔄 In Progress
 - None currently
 
 ### ⏳ Pending (High Priority)
-1. **Section 14 & 19**: Drag-and-drop, undo, and inline edit polish (optional)
-2. **Section 17**: API client consolidation (endpoints coverage)
+1. **Section 13.16-13.18**: Admin standard list editor + admin profile + static pages
+2. **Section 6.4**: Copy-on-write for school-shared lists
 3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1
 
 ### ⚠️ Known Limitations
-- List löschen/Bestätigung im UI noch offen
-- Drag-and-drop/Undo Shortcuts noch nicht implementiert
-- Route Guards für User/Admin fehlen (nur 401-Redirect)
-- Admin User-Edit/Delete/Passwort-Reset Buttons fehlen
+- Drag-and-drop/Undo für Sortieren nicht implementiert (optional)
+- Admin User-Edit/Delete/Passwort-Reset Buttons in UI fehlen
+- Admin Standardliste Editor noch nicht implementiert
+- Copy-on-write für schul-geteilte Listen noch offen
 
 **Status: Core Student Experience Complete - User/Admin Management Pages Next**
 **Last Updated: 2026-01-27**
