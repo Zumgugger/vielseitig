@@ -787,23 +787,23 @@
 
 ## 21. Frontend – QR-Code Display
 
-- [ ] **21.1** QR-Code Generation (Backend)
-  - [ ] Library z.B. `python-qrcode` oder `qrcode.js`
-  - [ ] GET /user/lists/{listId}/qr.png returns PNG Image
-  - [ ] Größe: ~200x200px oder skalierbar
+- [x] **21.1** QR-Code Generation (Backend)
+  - [x] Library z.B. `python-qrcode` oder `qrcode.js`
+  - [x] GET /user/lists/{listId}/qr.png returns PNG Image
+  - [x] Größe: ~200x200px oder skalierbar
 
-- [ ] **21.2** QR-Code Display (Frontend)
-  - [ ] Listen-Übersicht: QR-Code anzeigen (Icon oder Button zum Expandieren)
-  - [ ] Listen-Editor: QR-Code neben Share-Link anzeigen
-  - [ ] Größe: ~300x300px für Druck
+- [x] **21.2** QR-Code Display (Frontend)
+  - [x] Listen-Übersicht: QR-Code anzeigen (Icon oder Button zum Expandieren)
+  - [x] Listen-Editor: QR-Code neben Share-Link anzeigen
+  - [x] Größe: ~300x300px für Druck
 
-- [ ] **21.3** QR-Code Download/Print
-  - [ ] Button: "QR-Code drucken" oder "QR-Code herunterladen"
-  - [ ] Dialog oder neuer Tab mit QR zum Drucken
+- [x] **21.3** QR-Code Download/Print
+  - [x] Button: "QR-Code drucken" oder "QR-Code herunterladen"
+  - [x] Dialog oder neuer Tab mit QR zum Drucken
 
 - [ ] **21.4** Update todo.md & Git Commit (QR-Code Display Complete)
-  - [ ] Update todo.md to mark section 21 complete
-  - [ ] Update implementation status summary
+  - [x] Update todo.md to mark section 21 complete
+  - [x] Update implementation status summary
   - [ ] Git commit with message: "Implement QR code display and download (Section 21)"
   - [ ] Git push to main
 
@@ -1065,20 +1065,21 @@
 - **PDF Export: Download button with blob handling, localStorage cleanup, success/error notifications**
 - **User List Management: Overview with create + share copy, editor with autosave and adjective CRUD, profile view with logout**
 - **Admin Area: Pending Inbox, User/SCHOOL lists, Analytics summary + sessions table**
+- **QR Codes: Backend generation + UI preview/download in list overview and editor**
 
 ### 🔄 In Progress
 - None currently
 
 ### ⏳ Pending (High Priority)
-1. **Section 21**: QR code display for share links
-2. **Section 14 & 19**: Drag-and-drop, undo, and inline edit polish (optional)
-3. **Section 17-18**: Route Guards & consolidated API client cleanup
+1. **Section 14 & 19**: Drag-and-drop, undo, and inline edit polish (optional)
+2. **Section 17-18**: Route Guards & consolidated API client cleanup
+3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1, 21.4
 
 ### ⚠️ Known Limitations
 - List löschen/Bestätigung im UI noch offen
 - Drag-and-drop/Undo Shortcuts noch nicht implementiert
 - Route Guards für User/Admin fehlen (nur 401-Redirect)
-- QR-Code Anzeige/Download außerhalb Editor noch TBD
+- Admin User-Edit/Delete/Passwort-Reset Buttons fehlen
 
 **Status: Core Student Experience Complete - User/Admin Management Pages Next**
 **Last Updated: 2026-01-27**

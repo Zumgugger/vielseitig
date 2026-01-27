@@ -13,6 +13,7 @@ export default function UserListEditorPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [qrUrl, setQrUrl] = useState('');
   const [saveState, setSaveState] = useState('idle');
   const [error, setError] = useState('');
   const isFirstDraftUpdate = useRef(true);
@@ -58,6 +59,14 @@ export default function UserListEditorPage() {
   }, [listId]);
 
   useEffect(() => {
+    return () => {
+      if (qrUrl) {
+        URL.revokeObjectURL(qrUrl);
+      }
+    };
+  }, [qrUrl, listId]);
+
+  useEffect(() => {
     if (!listDraft || !canEdit) return;
     if (isFirstDraftUpdate.current) {
       isFirstDraftUpdate.current = false;
@@ -99,26 +108,42 @@ export default function UserListEditorPage() {
     }
   };
 
-  const handleDownloadQr = async () => {
-    if (!list) return;
+  const fetchQrCode = async () => {
+    if (!list) return null;
     setQrLoading(true);
     try {
       const response = await listsAPI.getListQRCode(list.id);
-      const blob = new Blob([response.data], { type: 'image/png' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `list_${list.id}_qr.png`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      const blobUrl = URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
+      if (qrUrl) {
+        URL.revokeObjectURL(qrUrl);
+      }
+      setQrUrl(blobUrl);
+      return blobUrl;
     } catch (err) {
       const message = err.response?.data?.detail || 'QR-Code konnte nicht geladen werden';
       setToast({ message, type: 'error' });
+      return null;
     } finally {
       setQrLoading(false);
     }
+  };
+
+  const handlePreviewQr = async () => {
+    if (qrUrl) return;
+    await fetchQrCode();
+  };
+
+  const handleDownloadQr = async () => {
+    if (!list) return;
+    const url = qrUrl || (await fetchQrCode());
+    if (!url) return;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `list_${list.id}_qr.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleUpdateAdjective = async (adjective) => {
@@ -259,10 +284,28 @@ export default function UserListEditorPage() {
                   <a href={shareUrl} target="_blank" rel="noreferrer" className="btn btn-outline">
                     Vorschau
                   </a>
-                  <Button variant="secondary" onClick={handleDownloadQr} disabled={!canEdit || qrLoading}>
-                    {qrLoading ? 'Lädt...' : 'QR-Code'}
+                  <Button variant="secondary" onClick={handlePreviewQr} disabled={!canEdit || qrLoading}>
+                    {qrLoading ? 'Lädt...' : 'QR anzeigen'}
+                  </Button>
+                  <Button variant="ghost" onClick={handleDownloadQr} disabled={!canEdit || qrLoading}>
+                    {qrLoading ? 'Bitte warten' : 'Download'}
                   </Button>
                 </div>
+                {qrUrl && (
+                  <div className="flex flex-col items-center gap-2 pt-2">
+                    <div className="bg-white p-3 rounded shadow-sm">
+                      <img src={qrUrl} alt={`QR-Code für ${list.name}`} className="w-56 h-56 object-contain" />
+                    </div>
+                    <div className="flex gap-2">
+                      <a href={qrUrl} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">
+                        In neuem Tab öffnen
+                      </a>
+                      <Button variant="ghost" size="sm" onClick={handleDownloadQr}>
+                        Speichern
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 {list?.share_expires_at && (
                   <p className="text-xs text-gray-600">
                     Gültig bis {new Date(list.share_expires_at).toLocaleDateString()}

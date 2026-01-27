@@ -29,6 +29,8 @@ export default function UserListsPage() {
     description: '',
     share_with_school: false,
   });
+  const [qrLoadingId, setQrLoadingId] = useState(null);
+  const [qrPreview, setQrPreview] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -102,6 +104,53 @@ export default function UserListsPage() {
       setToast({ message: 'Konnte Link nicht kopieren', type: 'error' });
     }
   };
+
+  const handleShowQr = async (list) => {
+    if (!list?.id) return;
+    setQrLoadingId(list.id);
+    try {
+      const response = await listsAPI.getListQRCode(list.id);
+      const blobUrl = URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
+
+      if (qrPreview?.url) {
+        URL.revokeObjectURL(qrPreview.url);
+      }
+
+      setQrPreview({
+        url: blobUrl,
+        name: list.name,
+        shareUrl: list.share_token ? `${window.location.origin}/l/${list.share_token}` : '',
+      });
+    } catch (err) {
+      const message = err.response?.data?.detail || 'QR-Code konnte nicht geladen werden';
+      setToast({ message, type: 'error' });
+    } finally {
+      setQrLoadingId(null);
+    }
+  };
+
+  const handleCloseQr = () => {
+    if (qrPreview?.url) URL.revokeObjectURL(qrPreview.url);
+    setQrPreview(null);
+  };
+
+  const handleDownloadQrFromPreview = () => {
+    if (!qrPreview?.url) return;
+    const link = document.createElement('a');
+    link.href = qrPreview.url;
+    link.download = `${qrPreview.name || 'list'}_qr.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (qrPreview?.url) {
+        URL.revokeObjectURL(qrPreview.url);
+      }
+    };
+  }, [qrPreview]);
 
   if (loading) return <Loading fullscreen />;
 
@@ -248,6 +297,16 @@ export default function UserListsPage() {
                             Teilen
                           </a>
                         )}
+                        {isOwn && list.share_token && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleShowQr(list)}
+                            disabled={qrLoadingId === list.id}
+                          >
+                            {qrLoadingId === list.id ? 'QR...' : 'QR-Code'}
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -264,6 +323,35 @@ export default function UserListsPage() {
             </table>
           </div>
         </div>
+
+        {qrPreview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="card w-full max-w-md">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">QR-Code für {qrPreview.name}</h3>
+                <button type="button" className="text-gray-500 hover:text-gray-700" onClick={handleCloseQr}>
+                  ✕
+                </button>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="bg-white p-3 rounded shadow-sm">
+                  <img
+                    src={qrPreview.url}
+                    alt={`QR-Code für ${qrPreview.name}`}
+                    className="w-64 h-64 object-contain"
+                  />
+                </div>
+                {qrPreview.shareUrl && (
+                  <div className="text-xs text-gray-700 break-all text-center">{qrPreview.shareUrl}</div>
+                )}
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Button variant="primary" onClick={handleDownloadQrFromPreview}>Download</Button>
+                  <Button variant="ghost" onClick={handleCloseQr}>Schliessen</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
