@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, HexagonGrid, Loading } from '../components';
+import { Button, HexagonGrid, Loading, Toast } from '../components';
 import { useTheme } from '../store/ThemeContext';
+import { studentApi } from '../api';
 
 /**
  * Student Results Page
@@ -31,6 +32,8 @@ export default function StudentResultsPage() {
   // Get state from navigation (passed from StudentSortPage)
   const [sessionData, setSessionData] = useState(null);
   const [randomSeed, setRandomSeed] = useState(Date.now());
+  const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   useEffect(() => {
     // Get data from sessionStorage (more reliable than location.state)
@@ -97,6 +100,52 @@ export default function StudentResultsPage() {
     navigate(token ? `/l/${token}` : '/sort', { replace: true });
   };
 
+  const handleExportPdf = async () => {
+    if (!sessionData?.sessionId) {
+      setToast({
+        show: true,
+        message: 'Keine Session-Daten verfügbar',
+        type: 'error'
+      });
+      return;
+    }
+
+    setIsExportingPdf(true);
+    try {
+      // Call PDF export API - returns blob
+      const response = await studentApi.exportPDF(sessionData.sessionId);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'ich-bin-vielseitig.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      // Clear localStorage after successful export
+      const storageKey = `vielseitig_session_${token || 'default'}`;
+      localStorage.removeItem(storageKey);
+
+      setToast({
+        show: true,
+        message: '📄 PDF erfolgreich heruntergeladen!',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      setToast({
+        show: true,
+        message: 'PDF-Export fehlgeschlagen. Bitte versuche es erneut.',
+        type: 'error'
+      });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   if (!sessionData) {
     return <Loading fullscreen />;
   }
@@ -144,6 +193,14 @@ export default function StudentResultsPage() {
                 className="whitespace-nowrap"
               >
                 🔄 Anders anordnen
+              </Button>
+              <Button
+                variant="accent"
+                onClick={handleExportPdf}
+                disabled={isExportingPdf}
+                className="whitespace-nowrap"
+              >
+                {isExportingPdf ? '⏳ Erstelle PDF...' : '📄 PDF herunterladen'}
               </Button>
               <Button
                 variant="primary"
@@ -206,6 +263,15 @@ export default function StudentResultsPage() {
           </p>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
     </div>
   );
 }

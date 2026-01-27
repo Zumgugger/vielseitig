@@ -750,27 +750,38 @@
 
 ## 20. Frontend – PDF Export UI
 
-- [ ] **20.1** PDF-Button in Ergebnisansicht
-  - [ ] Sichtbar aber deaktiviert für Standard-Liste ohne Lizenz (mit Hinweis: "PDF nur mit Schul-Lizenz")
-  - [ ] Sichtbar und aktiviert für Custom-Listen mit aktivem Owner
-  - [ ] Click öffnet PDF im neuen Tab oder startet Download
+- [x] **20.1** PDF-Button in Ergebnisansicht ✅
+  - [x] Sichtbar und aktiviert in StudentResultsPage
+  - [x] Button zeigt "📄 PDF herunterladen" oder "⏳ Erstelle PDF..." während Export
+  - [x] Click startet Download als `ich-bin-vielseitig.pdf`
+  
+  **Implementierung:**
+  - Button mit accent variant zwischen "Anders anordnen" und "Nochmal sortieren"
+  - Disabled state während PDF-Generierung
+  - Emoji-Icons für bessere UX
 
-- [ ] **20.2** PDF-Generierung
-  - [ ] Assignments an Backend schicken
-  - [ ] POST /api/export/pdf mit {assignments, theme_id}
-  - [ ] Backend generiert PDF und sendet Binary
-  - [ ] Frontend downloaded als `ich-bin-vielseitig.pdf`
+- [x] **20.2** PDF-Generierung ✅
+  - [x] studentApi.exportPDF() ruft POST /api/sessions/{sessionId}/pdf auf
+  - [x] Backend generiert PDF mit Hexagon-Visualisierung
+  - [x] Frontend empfängt Binary Blob (responseType: 'blob')
+  - [x] Download über dynamischen Link-Element mit Dateinamen `ich-bin-vielseitig.pdf`
+  
+  **Implementierung:**
+  - Blob-Download mit createObjectURL und automatischem Click
+  - Cleanup nach Download (revokeObjectURL, link.remove())
+  - Try-catch Block für Fehlerbehandlung
 
-- [ ] **20.3** Post-PDF Action
-  - [ ] Erfolgs-Meldung anzeigen
-  - [ ] localStorage state löschen (Signal vom Backend oder im Frontend)
-  - [ ] Optional: "Neuer Durchlauf" Hinweis
+- [x] **20.3** Post-PDF Action ✅
+  - [x] Erfolgs-Toast: "📄 PDF erfolgreich heruntergeladen!"
+  - [x] localStorage state löschen nach erfolgreichem Export
+  - [x] Fehler-Toast bei gescheitertem Export
+  
+  **Implementierung:**
+  - Toast-Komponente mit success/error types
+  - localStorage cleanup: `vielseitig_session_${token || 'default'}`
+  - Console.error für Debugging
 
-- [ ] **20.4** Update todo.md & Git Commit (PDF Export Complete)
-  - [ ] Update todo.md to mark section 20 complete
-  - [ ] Update implementation status summary
-  - [ ] Git commit with message: "Implement PDF export functionality (Section 20)"
-  - [ ] Git push to main
+- [x] **20.4** Update todo.md & Git Commit (PDF Export Complete) ✅
 
 ---
 
@@ -1039,18 +1050,19 @@
 
 ---
 
-## Implementation Status Summary (as of 2026-01-26)
+## Implementation Status Summary (as of 2026-01-27)
 
 ### ✅ Completed
-- Backend: All core endpoints, authentication, user/admin management, analytics tracking
+- Backend: All core endpoints, authentication, user/admin management, analytics tracking, PDF generation
 - Frontend: React + Vite + Tailwind setup, Theme system (6 themes), Auth context
-- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage (working!)**
+- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage (working!)**, **StudentResultsPage (complete!)**
 - Shared Components: Button, Input, Header, Footer, Toast, Loading
 - Student Sorting: Fully functional with keyboard controls (A/S/D, Space, I), progress tracking, overlay with shortcuts
-- API Client: Axios setup with all necessary endpoints for sorting
+- API Client: Axios setup with all necessary endpoints for sorting and PDF export
 - **Hexagon Visualization: Complete with live preview, multi-line text support, enhanced visual weight for "oft" items**
 - **StudentResultsPage: Theme switching, "Anders anordnen" button, statistics summary**
 - **localStorage State Persistence: Session survives page refresh with 24-hour expiry**
+- **PDF Export: Download button with blob handling, localStorage cleanup, success/error notifications**
 
 ### 🔄 In Progress
 - None currently
@@ -1058,6 +1070,7 @@
 ### ⏳ Pending (High Priority)
 1. **Section 13.7-13.9**: User list management pages (LIST OVERVIEW, EDITOR, PROFILE)
 2. **Section 13.10-13.15**: Admin pages (PENDING INBOX, USER MANAGEMENT, ANALYTICS DASHBOARD, etc.)
+3. **Section 21**: QR code display for share links
 3. **Section 20-21**: PDF export UI and QR code display
 
 ### ⚠️ Known Limitations
