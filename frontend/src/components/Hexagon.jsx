@@ -12,13 +12,14 @@ export default function Hexagon({
   word, 
   bucket = 'manchmal',
   theme = 'blue',
+  id,
   className = ''
 }) {
   // Theme color mapping with stronger colors for "oft" bucket
   const themeColors = {
     blue: {
       center: { fill: '#3B82F6', stroke: '#3B82F6', text: '#FFFFFF' },
-      oft: { fill: '#93C5FD', stroke: '#2563EB', text: '#1E3A8A' },
+      oft: { fill: '#60A5FA', stroke: '#1D4ED8', text: '#1E3A8A' },
       manchmal: { fill: '#DBEAFE', stroke: '#3B82F6', text: '#1E40AF' },
     },
     green: {
@@ -47,9 +48,9 @@ export default function Hexagon({
       manchmal: { fill: '#CCFBF1', stroke: '#14B8A6', text: '#115E59' },
     },
     dark: {
-      center: { fill: '#6366F1', stroke: '#6366F1', text: '#FFFFFF' },
-      oft: { fill: '#4B5563', stroke: '#6B7280', text: '#F3F4F6' },
-      manchmal: { fill: '#1F2937', stroke: '#4B5563', text: '#D1D5DB' },
+      center: { fill: '#4F46E5', stroke: '#4F46E5', text: '#FFFFFF' },
+      oft: { fill: '#374151', stroke: '#1F2937', text: '#F9FAFB' },
+      manchmal: { fill: '#111827', stroke: '#374151', text: '#D1D5DB' },
     },
   };
 
@@ -57,66 +58,89 @@ export default function Hexagon({
   const colors = themeColors[theme]?.[bucketType] || themeColors.blue.manchmal;
   const isBold = bucket === 'oft' || bucket === 'center';
   
-  // Dynamic font sizing based on word length for better fit
-  const getFontSize = () => {
-    if (word.length > 15) return size * 0.18;
-    if (word.length > 12) return size * 0.22;
-    if (word.length > 9) return size * 0.26;
-    if (word.length > 6) return size * 0.30;
-    return size * 0.35;
-  };
-  
-  const fontSize = getFontSize();
-  
-  // Split long words into multiple lines
-  const splitWord = (text, maxLength = 12) => {
+  // Split long words into multiple lines (up to 3 lines) for better fit
+  const splitWord = (text, maxLength = 11) => {
     if (text.length <= maxLength) return [text];
-    
-    // Try to split at natural break points
-    const words = text.split(/[-\s]/);
-    if (words.length > 1 && words.every(w => w.length <= maxLength)) {
-      return words;
+
+    // Try to split at hyphens or spaces first
+    const parts = text.split(/[-\s]/).filter(Boolean);
+    if (parts.length > 1) {
+      const lines = [];
+      let current = '';
+      parts.forEach(p => {
+        if ((current + (current ? ' ' : '') + p).length <= maxLength) {
+          current = current ? current + ' ' + p : p;
+        } else {
+          if (current) lines.push(current);
+          current = p;
+        }
+      });
+      if (current) lines.push(current);
+      return lines.slice(0, 3);
     }
-    
-    // Otherwise split in middle
-    const mid = Math.ceil(text.length / 2);
-    return [text.slice(0, mid) + '-', text.slice(mid)];
+
+    // Fallback: force split into 2-3 chunks
+    const chunk = Math.ceil(text.length / 2);
+    const first = text.slice(0, chunk);
+    const second = text.slice(chunk);
+    if (second.length > maxLength) {
+      const chunk2 = Math.ceil(second.length / 2);
+      return [first + '-', second.slice(0, chunk2) + '-', second.slice(chunk2)];
+    }
+    return [first + '-', second];
   };
+
+  const initialLines = word.length > 11 ? splitWord(word) : [word];
   
-  const lines = word.length > 12 ? splitWord(word) : [word];
-  const lineHeight = fontSize * 1.1;
-  const totalHeight = lines.length * lineHeight;
+  // Calculate a conservative font size that keeps all lines within the hex bounds
+  // Approximate average glyph width ~0.58 * fontSize
+  const allowedWidth = size * 1.6; // inner width allowance inside hex
+  const perLineFontSizes = initialLines.map(line => {
+    const byLength = allowedWidth / Math.max(1, (line.length * 0.58));
+    return Math.min(size * 0.35, Math.max(size * 0.16, byLength));
+  });
+  const fontSize = Math.min(...perLineFontSizes);
+  const lineHeight = fontSize * 1.08;
+  const totalHeight = initialLines.length * lineHeight;
   const startY = -(totalHeight / 2) + (lineHeight / 2);
   
   return (
     <g className={className}>
+      {/* ClipPath to ensure text never escapes the hexagon */}
+      <defs>
+        <clipPath id={`hexClip-${id ?? word}-${size}`}>
+          <path d={hexagonPath(size)} />
+        </clipPath>
+      </defs>
       {/* Hexagon Shape */}
       <path
         d={hexagonPath(size)}
         fill={colors.fill}
         stroke={colors.stroke}
-        strokeWidth={bucket === 'center' ? 3 : bucket === 'oft' ? 2.5 : 2}
+        strokeWidth={bucket === 'center' ? 3.5 : bucket === 'oft' ? 3 : 2}
       />
       
       {/* Text - with multi-line support */}
-      {lines.map((line, i) => (
-        <text
-          key={i}
-          x="0"
-          y={startY + (i * lineHeight)}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill={colors.text}
-          fontSize={fontSize}
-          fontWeight={isBold ? 'bold' : 'normal'}
-          style={{
-            userSelect: 'none',
-            pointerEvents: 'none',
-          }}
-        >
-          {line}
-        </text>
-      ))}
+      <g clipPath={`url(#hexClip-${id ?? word}-${size})`}>
+        {initialLines.map((line, i) => (
+          <text
+            key={i}
+            x="0"
+            y={startY + (i * lineHeight)}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={colors.text}
+            fontSize={fontSize}
+            fontWeight={isBold ? 'bold' : 'normal'}
+            style={{
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}
+          >
+            {line}
+          </text>
+        ))}
+      </g>
     </g>
   );
 }
@@ -125,6 +149,7 @@ Hexagon.propTypes = {
   size: PropTypes.number,
   word: PropTypes.string.isRequired,
   bucket: PropTypes.oneOf(['center', 'oft', 'manchmal']),
-  theme: PropTypes.oneOf(['blue', 'green', 'purple', 'pink', 'orange', 'teal']),
+  theme: PropTypes.oneOf(['blue', 'green', 'purple', 'pink', 'orange', 'teal', 'dark']),
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   className: PropTypes.string,
 };

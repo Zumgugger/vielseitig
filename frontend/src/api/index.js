@@ -85,6 +85,9 @@ export const studentAPI = {
     api.post(`/api/sessions/${sessionId}/pdf`, {}, { responseType: 'blob' }),
 };
 
+// Alias with camelCase used across pages
+export const studentApi = studentAPI;
+
 export const shareAPI = {
   // Public share endpoints
   getShareLinkData: (token) => 

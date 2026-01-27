@@ -24,7 +24,7 @@ export default function StudentResultsPage() {
     sunset: 'orange',
     forest: 'green',
     purple: 'purple',
-    dark: 'blue',
+    dark: 'dark',
   };
 
   const hexTheme = hexThemeMap[currentTheme] || 'blue';

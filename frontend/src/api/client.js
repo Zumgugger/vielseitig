@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// In dev, use Vite's proxy (relative URLs). In prod, use configured API base.
+const API_BASE_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_API_BASE_URL || ''
+  : '';
 
 /**
  * Create axios instance with default config

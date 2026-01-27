@@ -85,6 +85,7 @@ export default function HexagonGrid({
                 word={card.word}
                 bucket={bucket}
                 theme={theme}
+                id={card.id}
               />
             </g>
           );
@@ -107,7 +108,7 @@ HexagonGrid.propTypes = {
       word: PropTypes.string.isRequired,
     })
   ),
-  theme: PropTypes.oneOf(['blue', 'green', 'purple', 'pink', 'orange', 'teal']),
+  theme: PropTypes.oneOf(['blue', 'green', 'purple', 'pink', 'orange', 'teal', 'dark']),
   hexSize: PropTypes.number,
   randomSeed: PropTypes.number,
   className: PropTypes.string,
