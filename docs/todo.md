@@ -804,8 +804,8 @@
 - [ ] **21.4** Update todo.md & Git Commit (QR-Code Display Complete)
   - [x] Update todo.md to mark section 21 complete
   - [x] Update implementation status summary
-  - [ ] Git commit with message: "Implement QR code display and download (Section 21)"
-  - [ ] Git push to main
+  - [x] Git commit with message: "Implement QR code display and download (Section 21)"
+  - [x] Git push to main
 
 ---
 
@@ -1073,7 +1073,7 @@
 ### ⏳ Pending (High Priority)
 1. **Section 14 & 19**: Drag-and-drop, undo, and inline edit polish (optional)
 2. **Section 17-18**: Route Guards & consolidated API client cleanup
-3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1, 21.4
+3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1
 
 ### ⚠️ Known Limitations
 - List löschen/Bestätigung im UI noch offen
