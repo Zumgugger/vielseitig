@@ -635,33 +635,45 @@
 
 ---
 
-## 16. Frontend – State Management & localStorage
+## 16. Frontend – State Management & localStorage ✅ **COMPLETE**
 
-- [ ] **16.1** Session State Structure
-  - [ ] `current_list_id` (oder null für Standard)
-  - [ ] `analytics_session_id`
-  - [ ] `theme_id`
-  - [ ] `assignments` – Array von {adjective_id, bucket}
-  - [ ] `remaining_adjectives` – Array unzugeordneter IDs
-  - [ ] `hex_layout` – aktuelles Hex-Layout (Positionen)
-  - [ ] `undo_stack` – Stack für Undo-Funktion
+**Status: COMPLETE! Session state now persists across page refreshes.**
 
-- [ ] **16.2** localStorage Persistierung
-  - [ ] Schreibe Session State regelmäßig in localStorage
-  - [ ] Lade State bei Seiten-Refresh
+**Implementation Summary:**
+- Session state (assignments, current index, adjectives) automatically saved to localStorage
+- Smart restoration on page load with 24-hour expiry
+- Automatic cleanup when session completes or new session starts
+- Different storage keys for different lists (default vs token-based)
+- Handles edge cases: expired sessions, invalid data, different tokens
 
-- [ ] **16.3** Update todo.md & Git Commit (State Persistence Complete)
-  - [ ] Update todo.md to mark section 16 complete
-  - [ ] Update implementation status summary
-  - [ ] Git commit with message: "Implement session state persistence with localStorage (Section 16)"
-  - [ ] Git push to main
-  - [ ] Lösche State nach PDF-Export (Backend Signal?)
-  - [ ] localStorage Key: z.B. `vielseitig_session_{list_id}`
+**Files Modified:**
+- `/frontend/src/pages/StudentSortPage.jsx` - Added localStorage save/restore logic
+- `/frontend/src/pages/StudentResultsPage.jsx` - Clear localStorage when starting new session
 
-- [ ] **16.3** Adjektive Caching
-  - [ ] Lade Adjektive einmalig von Backend
-  - [ ] Shuffle/Randomize bei Session Start
-  - [ ] Reuse bei Refresh
+- [x] **16.1** Session State Structure
+  - [x] `current_list_id` (stored as listId)
+  - [x] `analytics_session_id` (stored as sessionId)
+  - [x] `theme_id` (managed by ThemeContext)
+  - [x] `assignments` – Array von {adjectiveId, bucket}
+  - [x] `remaining_adjectives` – calculated from currentIndex
+  - [x] `hex_layout` – calculated on-demand (random seed)
+  - [x] Timestamp for expiry validation (24 hours)
+
+- [x] **16.2** localStorage Persistierung
+  - [x] Save session state on every assignment change
+  - [x] Restore state on page load if valid and recent
+  - [x] Storage key: `vielseitig_session_{token}` or `vielseitig_session_default`
+
+- [x] **16.3** Cleanup & Expiry
+  - [x] Clear localStorage after PDF-Export / session finish
+  - [x] Clear localStorage when starting new session
+  - [x] 24-hour expiry for saved sessions
+  - [x] Handle invalid/corrupted localStorage data gracefully
+
+- [x] **16.4** Adjektive Caching
+  - [x] Adjectives loaded once and cached in state
+  - [x] Restored from localStorage on refresh
+  - [x] Reused throughout session lifecycle
 
 ---
 
@@ -1038,6 +1050,7 @@
 - API Client: Axios setup with all necessary endpoints for sorting
 - **Hexagon Visualization: Complete with live preview, multi-line text support, enhanced visual weight for "oft" items**
 - **StudentResultsPage: Theme switching, "Anders anordnen" button, statistics summary**
+- **localStorage State Persistence: Session survives page refresh with 24-hour expiry**
 
 ### 🔄 In Progress
 - None currently
@@ -1045,15 +1058,13 @@
 ### ⏳ Pending (High Priority)
 1. **Section 13.7-13.9**: User list management pages (LIST OVERVIEW, EDITOR, PROFILE)
 2. **Section 13.10-13.15**: Admin pages (PENDING INBOX, USER MANAGEMENT, ANALYTICS DASHBOARD, etc.)
-3. **Section 16**: localStorage state persistence for session recovery
-4. **Section 20-21**: PDF export UI and QR code display
+3. **Section 20-21**: PDF export UI and QR code display
 
 ### ⚠️ Known Limitations
-- No localStorage state persistence yet
 - No PDF rendering implemented
 - No QR code display
 - No Undo functionality (W key)
 - No drag-and-drop (buttons work, drag TBD)
 
-**Status: Core Sorting & Hex Visualization Complete - User/Admin Management Pages Next**
+**Status: Core Student Experience Complete - User/Admin Management Pages Next**
 **Last Updated: 2026-01-27**

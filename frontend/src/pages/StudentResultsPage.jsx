@@ -89,8 +89,11 @@ export default function StudentResultsPage() {
   };
 
   const handleNewSession = () => {
-    // Clear session data and go back to sorting
+    // Clear both session and sorting progress data
     sessionStorage.removeItem('sortingResults');
+    const storageKey = `vielseitig_session_${token || 'default'}`;
+    localStorage.removeItem(storageKey);
+    
     navigate(token ? `/l/${token}` : '/sort', { replace: true });
   };
 

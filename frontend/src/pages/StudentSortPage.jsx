@@ -76,6 +76,40 @@ export default function StudentSortPage() {
         setLoading(true);
         console.log('[StudentSortPage] Loading session, token:', token);
 
+        // Generate storage key based on token (or 'default')
+        const storageKey = `vielseitig_session_${token || 'default'}`;
+        
+        // Try to restore from localStorage first
+        const savedState = localStorage.getItem(storageKey);
+        if (savedState) {
+          try {
+            const parsed = JSON.parse(savedState);
+            console.log('[StudentSortPage] Found saved session:', parsed);
+            
+            // Validate saved data
+            if (parsed.adjectives && parsed.sessionState && parsed.timestamp) {
+              const age = Date.now() - parsed.timestamp;
+              const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+              
+              if (age < maxAge) {
+                // Restore state
+                setAdjectives(parsed.adjectives);
+                setSessionState(parsed.sessionState);
+                setLoading(false);
+                console.log('[StudentSortPage] Restored session from localStorage');
+                return;
+              } else {
+                console.log('[StudentSortPage] Saved session expired, starting fresh');
+                localStorage.removeItem(storageKey);
+              }
+            }
+          } catch (err) {
+            console.error('[StudentSortPage] Failed to parse saved session:', err);
+            localStorage.removeItem(storageKey);
+          }
+        }
+
+        // No valid saved state - load fresh
         // Determine which list to load and get adjectives
         let adjResponse;
         let listId;
@@ -132,6 +166,25 @@ export default function StudentSortPage() {
 
     loadSession();
   }, [token]);
+
+  // Save session state to localStorage whenever it changes
+  useEffect(() => {
+    if (!loading && sessionState.sessionId && adjectives.length > 0) {
+      const storageKey = `vielseitig_session_${token || 'default'}`;
+      const stateToSave = {
+        sessionState,
+        adjectives,
+        timestamp: Date.now(),
+      };
+      
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+        console.log('[StudentSortPage] Saved session to localStorage');
+      } catch (err) {
+        console.error('[StudentSortPage] Failed to save to localStorage:', err);
+      }
+    }
+  }, [sessionState, adjectives, loading, token]);
 
   // Get current adjective
   const currentAdjective = adjectives[sessionState.currentIndex];
@@ -207,6 +260,11 @@ export default function StudentSortPage() {
   const handleFinish = async () => {
     try {
       await analyticsApi.finishSession(sessionState.sessionId);
+      
+      // Clear localStorage for this session (no longer needed)
+      const storageKey = `vielseitig_session_${token || 'default'}`;
+      localStorage.removeItem(storageKey);
+      console.log('[StudentSortPage] Cleared session from localStorage');
       
       // Save results to sessionStorage for results page
       const resultsData = {
