@@ -46,6 +46,28 @@ export default function StudentSortPage() {
   const [toast, setToast] = useState(null);
   const [showInfo, setShowInfo] = useState(true);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [previewCollapsed, setPreviewCollapsed] = useState(true);
+
+  // Calculate live preview cards (oft/manchmal only)
+  const { oftCards, manchmalCards } = useMemo(() => {
+    const oft = [];
+    const manchmal = [];
+
+    sessionState.assignments.forEach(assignment => {
+      const adjective = adjectives.find(adj => adj.id === assignment.adjectiveId);
+      if (!adjective) return;
+
+      const card = { id: adjective.id, word: adjective.word };
+
+      if (assignment.bucket === 'oft') {
+        oft.push(card);
+      } else if (assignment.bucket === 'manchmal') {
+        manchmal.push(card);
+      }
+    });
+
+    return { oftCards: oft, manchmalCards: manchmal };
+  }, [sessionState.assignments, adjectives]);
 
   // Load adjectives on mount
   useEffect(() => {
@@ -219,30 +241,6 @@ export default function StudentSortPage() {
 
   const progress = sessionState.currentIndex + 1;
   const progressPercent = (progress / sessionState.totalCount) * 100;
-
-  // Calculate live preview cards (oft/manchmal only)
-  const { oftCards, manchmalCards } = useMemo(() => {
-    const oft = [];
-    const manchmal = [];
-
-    sessionState.assignments.forEach(assignment => {
-      const adjective = adjectives.find(adj => adj.id === assignment.adjectiveId);
-      if (!adjective) return;
-
-      const card = { id: adjective.id, word: adjective.word };
-
-      if (assignment.bucket === 'oft') {
-        oft.push(card);
-      } else if (assignment.bucket === 'manchmal') {
-        manchmal.push(card);
-      }
-    });
-
-    return { oftCards: oft, manchmalCards: manchmal };
-  }, [sessionState.assignments, adjectives]);
-
-  // Mobile state for collapsible preview
-  const [previewCollapsed, setPreviewCollapsed] = useState(true);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
