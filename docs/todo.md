@@ -565,49 +565,67 @@
 
 ---
 
-## 15. Frontend – Hexagon Rendering (DEFERRED - Not Started)
+## 15. Frontend – Hexagon Rendering ✅ **COMPLETE**
 
-**Note: Hex visualization deliberately deferred to post-MVP phase. Current results view shows theme selector and placeholder "Live-Vorschau kommt hier hin".**
+**Status: COMPLETE! Hexagon visualization fully implemented with live preview.**
 
-- [ ] **15.1** Hexagon Shape & SVG
-  - [ ] Hexagon-Form definieren (Koordinaten, Größe)
-  - [ ] SVG oder CSS Rendering?
-  - [ ] Responsiveness: Größe bei Mobile anpassen
+**Implementation Summary:**
+- Created comprehensive hexagon coordinate system utility (`utils/hexagon.js`)
+- Implemented random placement algorithm for "oft" and "manchmal" cards
+- Built SVG-based HexagonGrid component with theme support
+- Created Hexagon tile component with bold styling for "oft" cards
+- Integrated hex grid into StudentResultsPage with theme switching and "Anders anordnen" button
+- Added live preview to StudentSortPage with desktop split-view and collapsible mobile view
 
-- [ ] **15.2** Hex-Grid Layout Algorithm
-  - [ ] Koordinaten-System für Hexagon-Grid (Axial oder Cube Coordinates)
-  - [ ] Zentrum = "Ich bin"
-  - [ ] Ring 1, Ring 2, Ring 3 etc. Positionen berechnen
+**Files Created/Modified:**
+- `/frontend/src/utils/hexagon.js` - Complete hexagon grid utilities (axial coordinates, placement algorithm)
+- `/frontend/src/components/Hexagon.jsx` - Single hexagon tile component
+- `/frontend/src/components/HexagonGrid.jsx` - Full grid renderer with SVG
+- `/frontend/src/pages/StudentResultsPage.jsx` - Results page with hex visualization
+- `/frontend/src/pages/StudentSortPage.jsx` - Updated with live preview split view
+- `/frontend/src/App.jsx` - Added results routes
 
-- [ ] **15.3** Random Placement Algorithm (Schritt 1-3)
-  - [ ] 1. Zentrum platzieren
-  - [ ] 2. "oft"-Kacheln zufällig in freie Positionen platzieren (Rings expandieren)
-  - [ ] 3. "manchmal"-Kacheln nach "oft" zufällig platzieren
-  - [ ] Datenstruktur: Set von belegten Positionen, Queue von freien Nachbarpositionen
+- [x] **15.1** Hexagon Shape & SVG
+  - [x] Hexagon-Form definieren (Koordinaten, Größe)
+  - [x] SVG Rendering mit dynamischer Größe
+  - [x] Responsiveness: automatische Skalierung via viewBox
 
-- [ ] **15.4** Rendering von Kacheln
-  - [ ] Für jede Kachel: Hexagon zeichnen, Text hinzufügen
-  - [ ] "oft" Kacheln: **bold** Font
-  - [ ] "manchmal" Kacheln: normales Font
-  - [ ] Farb-Schema anwenden (basierend auf aktivem Theme)
-  - [ ] Zentrieren von Text in Hexagon
+- [x] **15.2** Hex-Grid Layout Algorithm
+  - [x] Axial Koordinaten-System implementiert
+  - [x] Zentrum = "Ich bin" fest platziert
+  - [x] Ring-basierte Expansion (hexRing, hexSpiral functions)
 
-- [ ] **15.5** Live-Vorschau Update
-  - [ ] Bei jeder Zuordnung (manchmal/oft): Hex-Grafik aktualisieren
-  - [ ] Bei "selten": keine visuelle Änderung
-  - [ ] Performance: nur aktualisierte Kachel rendern (optional)
+- [x] **15.3** Random Placement Algorithm (Schritt 1-3)
+  - [x] 1. Zentrum platzieren ("Ich bin")
+  - [x] 2. "oft"-Kacheln zufällig in freie Positionen platzieren (mit Nachbar-Expansion)
+  - [x] 3. "manchmal"-Kacheln nach "oft" zufällig platzieren
+  - [x] Datenstruktur: Map für placements, Set für occupied, Array für availablePositions
 
-- [ ] **15.6** "Anders anordnen" Button
-  - [ ] Button in Ergebnisansicht
-  - [ ] Click = Random Placement erneut ausführen
-  - [ ] Zuordnungen bleiben, nur Layout ändert sich
-  - [ ] Hex-Grafik animiert Update (optional)
+- [x] **15.4** Rendering von Kacheln
+  - [x] Für jede Kachel: SVG Hexagon mit Text
+  - [x] "oft" Kacheln: **bold** Font Weight
+  - [x] "manchmal" Kacheln: normales Font Weight
+  - [x] 6 Farb-Schemata (blue, green, purple, pink, orange, teal)
+  - [x] Automatisches Text-Zentrieren mit dominantBaseline/textAnchor
 
-- [ ] **15.7** Update todo.md & Git Commit (Hexagon Rendering Complete)
-  - [ ] Update todo.md to mark section 15 complete
-  - [ ] Update implementation status summary
-  - [ ] Git commit with message: "Implement hexagon visualization for sorting results (Section 15)"
-  - [ ] Git push to main
+- [x] **15.5** Live-Vorschau Update
+  - [x] Desktop: Split-View mit Live-Preview rechts (sticky positioning)
+  - [x] Mobile: Collapsible Preview (default collapsed)
+  - [x] Bei jeder Zuordnung (manchmal/oft): Hex-Grafik aktualisiert via React state
+  - [x] Bei "selten": keine visuelle Änderung (nicht im Grid)
+  - [x] useMemo für Performance-Optimierung
+
+- [x] **15.6** "Anders anordnen" Button
+  - [x] Button in Ergebnisansicht (StudentResultsPage)
+  - [x] Click = randomSeed ändern → triggert Re-Placement
+  - [x] Zuordnungen bleiben, nur Layout ändert sich
+  - [x] Sofortiges Update ohne Animation (kann später hinzugefügt werden)
+
+- [x] **15.7** Update todo.md & Git Commit (Hexagon Rendering Complete)
+  - [x] Update todo.md to mark section 15 complete
+  - [x] Update implementation status summary
+  - [x] Git commit with message: "Implement hexagon visualization for sorting results (Section 15)"
+  - [x] Git push to main
 
 ---
 

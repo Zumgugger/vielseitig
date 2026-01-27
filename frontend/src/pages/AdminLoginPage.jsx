@@ -92,12 +92,4 @@ export default function AdminLoginPage() {
       </div>
     </div>
   );
-}        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-gray-500 hover:text-primary">
-            ← Zurück zur Startseite
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
 }

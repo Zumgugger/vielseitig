@@ -11,6 +11,7 @@ import { AppHeader, AppFooter } from './components';
 // Pages
 import HomePage from './pages/HomePage';
 import StudentSortPage from './pages/StudentSortPage';
+import StudentResultsPage from './pages/StudentResultsPage';
 import UserLoginPage from './pages/UserLoginPage';
 import UserRegisterPage from './pages/UserRegisterPage';
 import AdminLoginPage from './pages/AdminLoginPage';
@@ -25,6 +26,8 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
           <Route path="/sort" element={<StudentSortPage />} />
           <Route path="/l/:token" element={<StudentSortPage />} />
+          <Route path="/results" element={<StudentResultsPage />} />
+          <Route path="/results/:token" element={<StudentResultsPage />} />
           
           {/* Auth routes */}
           <Route path="/user/login" element={<UserLoginPage />} />

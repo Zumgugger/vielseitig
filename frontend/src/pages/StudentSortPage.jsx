@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Button, Loading, Toast } from '../components';
-import { analyticsApi, listsApi, shareApi } from '../api/client';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button, Loading, Toast, HexagonGrid } from '../components';
+import { analyticsApi, studentApi, shareApi } from '../api/client';
 import { useTheme } from '../store/ThemeContext';
 
 /**
@@ -16,7 +16,20 @@ import { useTheme } from '../store/ThemeContext';
  */
 export default function StudentSortPage() {
   const { token } = useParams();
-  const { theme } = useTheme();
+  const navigate = useNavigate();
+  const { currentTheme } = useTheme();
+
+  // Map theme names for hex visualization
+  const hexThemeMap = {
+    default: 'blue',
+    ocean: 'teal',
+    sunset: 'orange',
+    forest: 'green',
+    purple: 'purple',
+    dark: 'blue',
+  };
+
+  const hexTheme = hexThemeMap[currentTheme] || 'blue';
 
   // State Management
   const [sessionState, setSessionState] = useState({
@@ -39,29 +52,31 @@ export default function StudentSortPage() {
     const loadSession = async () => {
       try {
         setLoading(true);
+        console.log('[StudentSortPage] Loading session, token:', token);
 
-        // Determine which list to load
-        let listId = null;
+        // Determine which list to load and get adjectives
+        let adjResponse;
+        let listId;
+
         if (token) {
-          // Share link
-          const response = await shareApi.getPublicList(token);
-          listId = response.data.id;
+          // Share link - use token to get public list
+          console.log('[StudentSortPage] Using share token:', token);
+          adjResponse = await shareApi.getPublicList(token);
+          listId = adjResponse.data.id;
         } else {
-          // Default list
+          // Default list - fetch from /student/default/adjectives
+          console.log('[StudentSortPage] Fetching default adjectives');
+          adjResponse = await studentApi.getDefaultAdjectives();
           listId = 'default';
         }
 
-        // Get adjectives
-        const adjResponse = token
-          ? await shareApi.getPublicList(token)
-          : await listsApi.getUserLists(); // TODO: Create GET /api/lists/default endpoint
-
+        console.log('[StudentSortPage] Got adjectives:', adjResponse.data.adjectives?.length);
         setAdjectives(adjResponse.data.adjectives || []);
 
         // Initialize session
         const sessionResponse = await analyticsApi.startSession(
-          listId,
-          null // user_id - anonymous for public sorting
+          null, // listId - will use default
+          null // themeId - optional
         );
 
         setSessionState(prev => ({
@@ -72,7 +87,21 @@ export default function StudentSortPage() {
           totalCount: adjResponse.data.adjectives?.length || 30,
         }));
       } catch (err) {
-        setError(err.response?.data?.detail || 'Failed to load adjectives');
+        console.error('[StudentSortPage] Error:', err);
+        let errorMsg = 'Failed to load adjectives';
+        
+        if (err.response?.data?.detail) {
+          const detail = err.response.data.detail;
+          if (typeof detail === 'string') {
+            errorMsg = detail;
+          } else if (Array.isArray(detail)) {
+            errorMsg = detail[0]?.msg || 'Validation error';
+          } else if (typeof detail === 'object') {
+            errorMsg = detail.msg || 'Validation error';
+          }
+        }
+        
+        setError(errorMsg);
         setToast({ message: 'Fehler beim Laden der Adjektive', type: 'error' });
       } finally {
         setLoading(false);
@@ -93,7 +122,7 @@ export default function StudentSortPage() {
       // Record assignment
       await analyticsApi.recordAssignment(
         sessionState.sessionId,
-        currentAdjective.word,
+        currentAdjective.id,
         bucket
       );
 
@@ -156,7 +185,19 @@ export default function StudentSortPage() {
   const handleFinish = async () => {
     try {
       await analyticsApi.finishSession(sessionState.sessionId);
-      // TODO: Redirect to results view with hex visualization
+      
+      // Save results to sessionStorage for results page
+      const resultsData = {
+        assignments: sessionState.assignments,
+        adjectives,
+        sessionId: sessionState.sessionId,
+        listId: sessionState.listId,
+        isDefault: sessionState.isDefault,
+      };
+      sessionStorage.setItem('sortingResults', JSON.stringify(resultsData));
+      
+      // Navigate to results page
+      navigate(token ? `/results/${token}` : '/results', { replace: true });
     } catch (err) {
       setToast({ message: 'Fehler beim Abschließen', type: 'error' });
     }
@@ -178,6 +219,30 @@ export default function StudentSortPage() {
 
   const progress = sessionState.currentIndex + 1;
   const progressPercent = (progress / sessionState.totalCount) * 100;
+
+  // Calculate live preview cards (oft/manchmal only)
+  const { oftCards, manchmalCards } = useMemo(() => {
+    const oft = [];
+    const manchmal = [];
+
+    sessionState.assignments.forEach(assignment => {
+      const adjective = adjectives.find(adj => adj.id === assignment.adjectiveId);
+      if (!adjective) return;
+
+      const card = { id: adjective.id, word: adjective.word };
+
+      if (assignment.bucket === 'oft') {
+        oft.push(card);
+      } else if (assignment.bucket === 'manchmal') {
+        manchmal.push(card);
+      }
+    });
+
+    return { oftCards: oft, manchmalCards: manchmal };
+  }, [sessionState.assignments, adjectives]);
+
+  // Mobile state for collapsible preview
+  const [previewCollapsed, setPreviewCollapsed] = useState(true);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
@@ -202,103 +267,156 @@ export default function StudentSortPage() {
         </div>
       )}
 
-      {/* Main Container */}
-      <div className="max-w-2xl mx-auto">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">
-              Fortschritt
-            </span>
-            <span className="text-sm text-gray-600">
-              {progress}/{sessionState.totalCount}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Adjective Card - Main */}
-        {currentAdjective ? (
-          <div className="card text-center mb-8">
-            {/* Adjective Display */}
+      {/* Main Container - Split Layout on Desktop */}
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Sorting Interface */}
+          <div>
+            {/* Progress Bar */}
             <div className="mb-8">
-              <p className="text-lg text-gray-600 mb-4">Das Adjektiv:</p>
-              <h1 className="text-6xl font-bold text-blue-600 mb-2">
-                {currentAdjective.word}
-              </h1>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Fortschritt
+                </span>
+                <span className="text-sm text-gray-600">
+                  {progress}/{sessionState.totalCount}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
+              </div>
+            </div>
 
-              {/* Explanation Toggle */}
-              <button
-                onClick={() => setShowExplanation(!showExplanation)}
-                className="text-sm text-gray-500 hover:text-gray-700 mt-4 inline-flex items-center gap-1"
-              >
-                <span>ℹ️ Erklärung</span>
-                <span>{showExplanation ? '▼' : '▶'}</span>
-              </button>
+            {/* Adjective Card - Main */}
+            {currentAdjective ? (
+              <div className="card text-center mb-8">
+                {/* Adjective Display */}
+                <div className="mb-8">
+                  <p className="text-lg text-gray-600 mb-4">Das Adjektiv:</p>
+                  <h1 className="text-5xl lg:text-6xl font-bold text-blue-600 mb-2">
+                    {currentAdjective.word}
+                  </h1>
 
-              {/* Explanation & Example */}
-              {showExplanation && (
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg text-left">
+                  {/* Explanation Toggle */}
+                  <button
+                    onClick={() => setShowExplanation(!showExplanation)}
+                    className="text-sm text-gray-500 hover:text-gray-700 mt-4 inline-flex items-center gap-1"
+                  >
+                    <span>ℹ️ Erklärung</span>
+                    <span>{showExplanation ? '▼' : '▶'}</span>
+                  </button>
+
+                  {/* Explanation & Example */}
+                  {showExplanation && (
+                    <div className="mt-6 p-4 bg-blue-50 rounded-lg text-left">
+                      <p className="text-sm">
+                        <strong>Erklärung:</strong> {currentAdjective.explanation}
+                      </p>
+                      <p className="text-sm mt-3">
+                        <strong>Beispiel:</strong> {currentAdjective.example}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bucket Buttons */}
+                <div className="grid grid-cols-3 gap-4">
+                  <Button
+                    variant="danger"
+                    size="lg"
+                    onClick={() => handleAssign('selten')}
+                    className="h-24 text-lg font-semibold"
+                  >
+                    😕<br />Selten
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    onClick={() => handleAssign('manchmal')}
+                    className="h-24 text-lg font-semibold"
+                  >
+                    😐<br />Manchmal
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => handleAssign('oft')}
+                    className="h-24 text-lg font-semibold"
+                  >
+                    😊<br />Oft
+                  </Button>
+                </div>
+
+                {/* Keyboard Help */}
+                <p className="text-xs text-gray-500 mt-6">
+                  💡 Tipp: Nutze <strong>A</strong>, <strong>S</strong>, <strong>D</strong> oder Pfeiltasten | <strong>Space</strong> für Erklärung
+                </p>
+              </div>
+            ) : (
+              <div className="card text-center">
+                <div className="text-4xl mb-4">✅</div>
+                <h2 className="text-2xl font-bold mb-4">Fertig!</h2>
+                <p className="text-gray-600 mb-6">
+                  Sie haben alle {sessionState.totalCount} Adjektive sortiert.
+                </p>
+                <Button variant="primary" onClick={handleFinish}>
+                  Ergebnisse anschauen →
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Live Preview (Desktop) / Collapsible (Mobile) */}
+          <div className="lg:sticky lg:top-8 lg:self-start">
+            {/* Mobile Toggle Button */}
+            <button
+              onClick={() => setPreviewCollapsed(!previewCollapsed)}
+              className="lg:hidden w-full mb-4 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-between hover:bg-gray-50 transition"
+            >
+              <span className="text-sm font-medium text-gray-700">
+                Live-Vorschau
+              </span>
+              <span className="text-gray-500">
+                {previewCollapsed ? '▼' : '▲'}
+              </span>
+            </button>
+
+            {/* Preview Container */}
+            <div className={`card ${previewCollapsed ? 'hidden lg:block' : 'block'}`}>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                Deine Persönlichkeit
+              </h3>
+              
+              {oftCards.length === 0 && manchmalCards.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="text-4xl mb-2">🔷</div>
                   <p className="text-sm">
-                    <strong>Erklärung:</strong> {currentAdjective.explanation}
-                  </p>
-                  <p className="text-sm mt-3">
-                    <strong>Beispiel:</strong> {currentAdjective.example}
+                    Wähle "Manchmal" oder "Oft"<br />
+                    um die Vorschau zu sehen
                   </p>
                 </div>
+              ) : (
+                <HexagonGrid
+                  oftCards={oftCards}
+                  manchmalCards={manchmalCards}
+                  theme={hexTheme}
+                  hexSize={45}
+                  randomSeed={42} // Fixed seed during sorting for consistency
+                  className="w-full"
+                />
               )}
+              
+              <div className="mt-4 text-center text-xs text-gray-500">
+                <p>
+                  Live-Vorschau • <strong>Fett</strong> = Oft
+                </p>
+              </div>
             </div>
-
-            {/* Bucket Buttons */}
-            <div className="grid grid-cols-3 gap-4">
-              <Button
-                variant="danger"
-                size="lg"
-                onClick={() => handleAssign('selten')}
-                className="h-24 text-lg font-semibold"
-              >
-                😕<br />Selten
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => handleAssign('manchmal')}
-                className="h-24 text-lg font-semibold"
-              >
-                😐<br />Manchmal
-              </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => handleAssign('oft')}
-                className="h-24 text-lg font-semibold"
-              >
-                😊<br />Oft
-              </Button>
-            </div>
-
-            {/* Keyboard Help */}
-            <p className="text-xs text-gray-500 mt-6">
-              💡 Tipp: Nutze <strong>A</strong>, <strong>S</strong>, <strong>D</strong> oder Pfeiltasten | <strong>Space</strong> für Erklärung
-            </p>
           </div>
-        ) : (
-          <div className="card text-center">
-            <div className="text-4xl mb-4">✅</div>
-            <h2 className="text-2xl font-bold mb-4">Fertig!</h2>
-            <p className="text-gray-600 mb-6">
-              Sie haben alle {sessionState.totalCount} Adjektive sortiert.
-            </p>
-            <Button variant="primary" onClick={handleFinish}>
-              Ergebnisse anschauen →
-            </Button>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -82,8 +82,6 @@ export default function UserRegisterPage() {
       });
 
       setTimeout(() => navigate('/user/login'), 2000);
-      setSuccess(true);
-    } catch (err) {
     } catch (err) {
       const message = err.response?.data?.detail || 'Registrierung fehlgeschlagen';
       setToast({ message, type: 'error' });
@@ -233,64 +231,7 @@ export default function UserRegisterPage() {
             <Link to="/" className="text-gray-500 hover:text-blue-600">
               ← Zurück zur Startseite
             </Link>
-              className="input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="ihre.email@schule.ch"
-            />
-          </div>
-
-          <div>
-            <label className="label">Passwort</label>
-            <input
-              type="password"
-              className="input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-            />
-            <p className="text-xs text-gray-500 mt-1">Mindestens 8 Zeichen</p>
-          </div>
-
-          <div>
-            <label className="label">Schule</label>
-            <input
-              type="text"
-              className="input"
-              value={schoolName}
-              onChange={(e) => setSchoolName(e.target.value)}
-              required
-              placeholder="Name Ihrer Schule"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Falls Ihre Schule bereits registriert ist, wird Ihr Account mit ihr verknüpft.
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading}
-          >
-            {loading ? 'Wird registriert...' : 'Registrieren'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm">
-          <p className="text-gray-600">
-            Bereits registriert?{' '}
-            <Link to="/user/login" className="text-primary hover:underline">
-              Jetzt anmelden
-            </Link>
           </p>
-        </div>
-
-        <div className="mt-4 text-center">
-          <Link to="/" className="text-sm text-gray-500 hover:text-primary">
-            ← Zurück zur Startseite
-          </Link>
         </div>
       </div>
     </div>

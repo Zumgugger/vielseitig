@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
  * Create axios instance with default config
- * Vite proxy handles /api, /admin, /user, /l routes to backend
+ * Use relative URLs so Vite proxy handles all requests to backend
+ * In production, this will be replaced with the API domain
  */
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -19,6 +20,8 @@ const api = axios.create({
  */
 api.interceptors.request.use(
   (config) => {
+    const fullUrl = config.baseURL ? config.baseURL + config.url : config.url;
+    console.log('[API Request]', config.method?.toUpperCase(), 'baseURL:', config.baseURL, 'url:', config.url, 'full:', fullUrl);
     return config;
   },
   (error) => {
@@ -47,17 +50,28 @@ export default api;
  * Analytics API
  */
 export const analyticsApi = {
-  startSession: (listId, userId) =>
-    api.post('/analytics/session/start', { list_id: listId, user_id: userId }),
+  startSession: (listId, themeId) =>
+    api.post('/api/analytics/session/start', { list_id: listId || null, theme_id: themeId || null }),
 
-  recordAssignment: (sessionId, adjective, bucket) =>
-    api.post('/analytics/assignment', { session_id: sessionId, adjective, bucket }),
+  recordAssignment: (sessionId, adjectiveId, bucket) =>
+    api.post('/api/analytics/assignment', { analytics_session_id: sessionId, adjective_id: adjectiveId, bucket }),
 
   finishSession: (sessionId) =>
-    api.post('/analytics/session/finish', { session_id: sessionId }),
+    api.post('/api/analytics/session/finish', { analytics_session_id: sessionId }),
 
   exportPdf: (sessionId, schoolName) =>
-    api.post('/analytics/session/pdf-export', { session_id: sessionId, school_name: schoolName }),
+    api.post('/api/analytics/session/pdf-export', { analytics_session_id: sessionId, school_name: schoolName }),
+};
+
+/**
+ * Student sorting API
+ */
+export const studentApi = {
+  getDefaultAdjectives: () =>
+    api.get('/api/lists/default/adjectives'),
+
+  getListAdjectives: (listId) =>
+    api.get(`/api/lists/${listId}/adjectives`),
 };
 
 /**

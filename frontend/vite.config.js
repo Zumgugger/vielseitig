@@ -19,6 +19,10 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/student': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
       '/l': {
         target: 'http://localhost:8000',
         changeOrigin: true,

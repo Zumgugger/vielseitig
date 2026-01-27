@@ -4,3 +4,5 @@ export { default as AppHeader } from './AppHeader';
 export { default as AppFooter } from './AppFooter';
 export { default as Toast } from './Toast';
 export { default as Loading } from './Loading';
+export { default as Hexagon } from './Hexagon';
+export { default as HexagonGrid } from './HexagonGrid';
