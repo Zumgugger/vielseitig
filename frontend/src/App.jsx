@@ -1,12 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './styles/index.css';
 
 // Context providers
 import { ThemeProvider } from './store/ThemeContext';
-import { AuthProvider } from './store/AuthContext';
+import { AuthProvider, useAuth } from './store/AuthContext';
 
 // Layout components
-import { AppHeader, AppFooter } from './components';
+import { AppHeader, AppFooter, Loading } from './components';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -22,6 +22,24 @@ import AdminPendingPage from './pages/AdminPendingPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminSchoolsPage from './pages/AdminSchoolsPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+
+function RequireUser({ children }) {
+  const { user, isInitializing } = useAuth();
+  const location = useLocation();
+
+  if (isInitializing) return <Loading fullscreen />;
+  if (!user) return <Navigate to="/user/login" replace state={{ from: location }} />;
+  return children;
+}
+
+function RequireAdmin({ children }) {
+  const { admin, isInitializing } = useAuth();
+  const location = useLocation();
+
+  if (isInitializing) return <Loading fullscreen />;
+  if (!admin) return <Navigate to="/admin/login" replace state={{ from: location }} />;
+  return children;
+}
 
 function AppContent() {
   return (
@@ -39,14 +57,63 @@ function AppContent() {
           {/* Auth routes */}
           <Route path="/user/login" element={<UserLoginPage />} />
           <Route path="/user/register" element={<UserRegisterPage />} />
-          <Route path="/user/profile" element={<UserProfilePage />} />
-          <Route path="/user/lists" element={<UserListsPage />} />
-          <Route path="/user/lists/:listId" element={<UserListEditorPage />} />
+          <Route
+            path="/user/profile"
+            element={(
+              <RequireUser>
+                <UserProfilePage />
+              </RequireUser>
+            )}
+          />
+          <Route
+            path="/user/lists"
+            element={(
+              <RequireUser>
+                <UserListsPage />
+              </RequireUser>
+            )}
+          />
+          <Route
+            path="/user/lists/:listId"
+            element={(
+              <RequireUser>
+                <UserListEditorPage />
+              </RequireUser>
+            )}
+          />
           <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin/pending" element={<AdminPendingPage />} />
-          <Route path="/admin/users" element={<AdminUsersPage />} />
-          <Route path="/admin/schools" element={<AdminSchoolsPage />} />
-          <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+          <Route
+            path="/admin/pending"
+            element={(
+              <RequireAdmin>
+                <AdminPendingPage />
+              </RequireAdmin>
+            )}
+          />
+          <Route
+            path="/admin/users"
+            element={(
+              <RequireAdmin>
+                <AdminUsersPage />
+              </RequireAdmin>
+            )}
+          />
+          <Route
+            path="/admin/schools"
+            element={(
+              <RequireAdmin>
+                <AdminSchoolsPage />
+              </RequireAdmin>
+            )}
+          />
+          <Route
+            path="/admin/analytics"
+            element={(
+              <RequireAdmin>
+                <AdminAnalyticsPage />
+              </RequireAdmin>
+            )}
+          />
           
           {/* Protected routes (we'll add these later) */}
           {/* <Route path="/user/*" element={<UserArea />} /> */}

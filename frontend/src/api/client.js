@@ -39,9 +39,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - redirect to login
-      localStorage.removeItem('authToken');
-      window.location.href = '/user/login';
+      const url = error.config?.url || '';
+      const isAdminRoute = url.startsWith('/admin');
+      const target = isAdminRoute ? '/admin/login' : '/user/login';
+      window.location.href = target;
     }
     return Promise.reject(error);
   }

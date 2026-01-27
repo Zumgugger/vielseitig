@@ -704,22 +704,22 @@
 
 ## 18. Frontend – User Authentication
 
-- [ ] **18.1** Login/Logout Flow
-  - [ ] Login Page Component
-  - [ ] POST /admin/login (Admin)
-  - [ ] POST /user/login (User)
-  - [ ] Session Cookie automatisch im Browser gespeichert
-  - [ ] Logout: DELETE Session, Redirect zu Login
+- [x] **18.1** Login/Logout Flow
+  - [x] Login Page Component
+  - [x] POST /admin/login (Admin)
+  - [x] POST /user/login (User)
+  - [x] Session Cookie automatisch im Browser gespeichert
+  - [x] Logout: DELETE Session, Redirect zu Login
 
-- [ ] **18.2** Session Validation
-  - [ ] Bei App-Load: prüfe ob Session gültig
-  - [ ] Wenn ungültig: Redirect zu Login
+- [x] **18.2** Session Validation
+  - [x] Bei App-Load: prüfe ob Session gültig
+  - [x] Wenn ungültig: Redirect zu Login
   - [ ] Optional: Refresh Token Mechanism (TBD)
 
-- [ ] **18.3** Protected Routes
-  - [ ] Route Guard für User-only Pages
-  - [ ] Route Guard für Admin-only Pages
-  - [ ] Public Routes (Schüler:innen-Modus)
+- [x] **18.3** Protected Routes
+  - [x] Route Guard für User-only Pages
+  - [x] Route Guard für Admin-only Pages
+  - [x] Public Routes (Schüler:innen-Modus)
 
 ---
 
@@ -1066,13 +1066,14 @@
 - **User List Management: Overview with create + share copy, editor with autosave and adjective CRUD, profile view with logout**
 - **Admin Area: Pending Inbox, User/SCHOOL lists, Analytics summary + sessions table**
 - **QR Codes: Backend generation + UI preview/download in list overview and editor**
+- **Auth Guards: Session validation on app load, protected admin/user routes, unified login handling**
 
 ### 🔄 In Progress
 - None currently
 
 ### ⏳ Pending (High Priority)
 1. **Section 14 & 19**: Drag-and-drop, undo, and inline edit polish (optional)
-2. **Section 17-18**: Route Guards & consolidated API client cleanup
+2. **Section 17**: API client consolidation (endpoints coverage)
 3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1
 
 ### ⚠️ Known Limitations

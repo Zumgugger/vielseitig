@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Toast } from '../components';
-import { authApi } from '../api/client';
+import { authAPI } from '../api';
 import { useAuth } from '../store/AuthContext';
 
 export default function UserLoginPage() {
@@ -19,7 +19,7 @@ export default function UserLoginPage() {
     setLoading(true);
 
     try {
-      const response = await authApi.loginUser(email, password);
+      const response = await authAPI.userLogin({ email, password });
       loginUser(response.data);
       setToast({ message: 'Erfolgreich angemeldet!', type: 'success' });
       setTimeout(() => navigate('/user/lists'), 1500);

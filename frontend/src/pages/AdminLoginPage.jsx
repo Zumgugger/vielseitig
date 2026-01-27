@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Toast } from '../components';
-import { adminAuthApi } from '../api/client';
+import { authAPI } from '../api';
 import { useAuth } from '../store/AuthContext';
 
 export default function AdminLoginPage() {
@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const response = await adminAuthApi.loginAdmin(email, password);
+      const response = await authAPI.adminLogin({ username: email, password });
       loginAdmin(response.data);
       setToast({ message: 'Admin erfolgreich angemeldet!', type: 'success' });
       setTimeout(() => navigate('/admin/pending'), 1500);

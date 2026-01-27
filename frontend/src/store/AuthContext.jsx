@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { authAPI } from '../api';
 
 /**
  * AuthContext provides authentication state and methods
@@ -10,7 +11,35 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [admin, setAdmin] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadSession = async () => {
+      setIsInitializing(true);
+      try {
+        const userRes = await authAPI.userProfile();
+        setUser(userRes.data);
+        setAdmin(null);
+        setError(null);
+      } catch (userErr) {
+        // If not a user session, try admin session
+        try {
+          const adminRes = await authAPI.adminProfile();
+          setAdmin(adminRes.data);
+          setUser(null);
+          setError(null);
+        } catch (adminErr) {
+          setUser(null);
+          setAdmin(null);
+        }
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    loadSession();
+  }, []);
 
   /**
    * Set user after login
@@ -39,6 +68,31 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  const refreshSession = async () => {
+    setIsInitializing(true);
+    try {
+      const userRes = await authAPI.userProfile();
+      setUser(userRes.data);
+      setAdmin(null);
+      return { type: 'user', data: userRes.data };
+    } catch (userErr) {
+      try {
+        const adminRes = await authAPI.adminProfile();
+        setAdmin(adminRes.data);
+        setUser(null);
+        return { type: 'admin', data: adminRes.data };
+      } catch (adminErr) {
+        setUser(null);
+        setAdmin(null);
+        return null;
+      } finally {
+        setIsInitializing(false);
+      }
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
   /**
    * Set authentication error
    */
@@ -60,10 +114,12 @@ export const AuthProvider = ({ children }) => {
     isAdmin: !!admin,
     isUser: !!user,
     isLoading,
+    isInitializing,
     error,
     loginUser,
     loginAdmin,
     logout,
+    refreshSession,
     setAuthError,
     clearError,
     setIsLoading,
