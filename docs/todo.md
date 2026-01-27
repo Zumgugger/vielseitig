@@ -627,6 +627,12 @@
   - [x] Git commit with message: "Implement hexagon visualization for sorting results (Section 15)"
   - [x] Git push to main
 
+- [x] **15.8** Hexagon Improvements (Text Overflow & Visual Weight)
+  - [x] Fixed text overflow with dynamic font sizing and multi-line support
+  - [x] Enhanced "oft" visual weight with stronger colors and thicker strokes
+  - [x] Improved dark theme with distinct indigo/violet colors
+  - [x] Added word splitting for long adjectives (auto-hyphenation)
+
 ---
 
 ## 16. Frontend – State Management & localStorage
@@ -1030,25 +1036,24 @@
 - Shared Components: Button, Input, Header, Footer, Toast, Loading
 - Student Sorting: Fully functional with keyboard controls (A/S/D, Space, I), progress tracking, overlay with shortcuts
 - API Client: Axios setup with all necessary endpoints for sorting
+- **Hexagon Visualization: Complete with live preview, multi-line text support, enhanced visual weight for "oft" items**
+- **StudentResultsPage: Theme switching, "Anders anordnen" button, statistics summary**
 
 ### 🔄 In Progress
-- Fix remaining API integration issues (mostly resolved, session tracking working)
-- Remove debug console logs after testing
+- None currently
 
 ### ⏳ Pending (High Priority)
 1. **Section 13.7-13.9**: User list management pages (LIST OVERVIEW, EDITOR, PROFILE)
 2. **Section 13.10-13.15**: Admin pages (PENDING INBOX, USER MANAGEMENT, ANALYTICS DASHBOARD, etc.)
-3. **Section 15**: Hexagon visualization (DEFERRED - currently showing placeholder in results view)
-4. **Section 16**: localStorage state persistence for session recovery
-5. **Section 20-21**: PDF export UI and QR code display
+3. **Section 16**: localStorage state persistence for session recovery
+4. **Section 20-21**: PDF export UI and QR code display
 
 ### ⚠️ Known Limitations
-- No hex visualization yet (placeholder text shown in results view)
+- No localStorage state persistence yet
 - No PDF rendering implemented
 - No QR code display
 - No Undo functionality (W key)
 - No drag-and-drop (buttons work, drag TBD)
-- State not persisted to localStorage
 
-**Status: MVP Frontend Functional - Core Sorting Works, Admin/Teacher Pages TBD**
-**Last Updated: 2026-01-26**
+**Status: Core Sorting & Hex Visualization Complete - User/Admin Management Pages Next**
+**Last Updated: 2026-01-27**

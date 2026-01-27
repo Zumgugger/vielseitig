@@ -82,10 +82,10 @@ const THEMES = {
   },
   dark: {
     name: 'Dark Mode',
-    primary: 'blue',
+    primary: 'indigo',
     secondary: 'slate',
-    accent: 'gray',
-    success: 'green',
+    accent: 'violet',
+    success: 'emerald',
     error: 'red',
     warning: 'amber',
     tailwind: {
