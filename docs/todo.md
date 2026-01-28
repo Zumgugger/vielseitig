@@ -525,9 +525,9 @@
   - [ ] Username anzeigen
   - [ ] Logout Button
 
-- [ ] **13.18** Statische Seiten
-  - [ ] `/impressum` – Impressum (Text vom Betreiber)
-  - [ ] `/datenschutz` – Datenschutzerklärung (Text vom Betreiber, Hinweis: keine Schüler:innen-Daten)
+- [x] **13.18** Statische Seiten
+  - [x] `/impressum` – Impressum (Platzhalter; finalen Betreiber-Text einsetzen)
+  - [x] `/datenschutz` – Datenschutzerklärung (Platzhalter; finalen Betreiber-Text + Hinweis „Schüler:innen-Daten werden nicht gespeichert“ einsetzen)
 
 ---
 
@@ -1075,7 +1075,7 @@
 - None currently
 
 ### ⏳ Pending (High Priority)
-1. **Section 13.16-13.18**: Admin standard list editor + admin profile + static pages
+1. **Section 13.16-13.17**: Admin standard list editor + admin profile/logout
 2. **Section 6.4**: Copy-on-write for school-shared lists
 3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1
 
@@ -1084,6 +1084,7 @@
 - Admin User-Edit/Delete/Passwort-Reset Buttons in UI fehlen
 - Admin Standardliste Editor noch nicht implementiert
 - Copy-on-write für schul-geteilte Listen noch offen
+- Impressum/Datenschutz Seiten enthalten noch Platzhaltertext; finalen Betreibertext einsetzen
 
 **Status: Core Student Experience Complete - User/Admin Management Pages Next**
 **Last Updated: 2026-01-27**

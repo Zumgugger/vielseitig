@@ -22,6 +22,8 @@ import AdminPendingPage from './pages/AdminPendingPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminSchoolsPage from './pages/AdminSchoolsPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+import ImpressumPage from './pages/ImpressumPage';
+import DatenschutzPage from './pages/DatenschutzPage';
 
 function RequireUser({ children }) {
   const { user, isInitializing } = useAuth();
@@ -53,6 +55,8 @@ function AppContent() {
           <Route path="/l/:token" element={<StudentSortPage />} />
           <Route path="/results" element={<StudentResultsPage />} />
           <Route path="/results/:token" element={<StudentResultsPage />} />
+          <Route path="/impressum" element={<ImpressumPage />} />
+          <Route path="/datenschutz" element={<DatenschutzPage />} />
           
           {/* Auth routes */}
           <Route path="/user/login" element={<UserLoginPage />} />

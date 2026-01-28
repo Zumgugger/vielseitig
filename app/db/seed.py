@@ -50,22 +50,31 @@ async def seed_default_list(session: AsyncSession) -> None:
 
 async def seed_default_admin(session: AsyncSession) -> None:
     """Seed the default admin account."""
-    # Check if admin already exists
-    result = await session.execute(select(Admin).where(Admin.username == "admin"))
+    # Check if admin already exists (legacy username or new email-style username)
+    result = await session.execute(
+        select(Admin).where(Admin.username.in_(["admin", "admin@admin.com"]))
+    )
     existing_admin = result.scalar_one_or_none()
 
     if existing_admin:
-        logger.info("Default admin account already exists, skipping seed")
+        # Backfill legacy username to new email-style username
+        if existing_admin.username == "admin":
+            existing_admin.username = "admin@admin.com"
+            session.add(existing_admin)
+            await session.commit()
+            logger.info("Updated default admin username to admin@admin.com")
+        else:
+            logger.info("Default admin account already exists, skipping seed")
         return
 
     # Create admin with temporary password
     admin = Admin(
-        username="admin",
+        username="admin@admin.com",
         password_hash=get_password_hash("changeme"),
     )
     session.add(admin)
     await session.commit()
-    logger.info("Created default admin account (username: admin, password: changeme)")
+    logger.info("Created default admin account (username: admin@admin.com, password: changeme)")
     logger.warning("⚠️  IMPORTANT: Change the admin password immediately after first login!")
 
 

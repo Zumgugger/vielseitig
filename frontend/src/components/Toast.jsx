@@ -6,6 +6,8 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
+  const text = typeof message === 'string' ? message : JSON.stringify(message);
+
   const bgColor = {
     info: 'bg-blue-50 border-blue-200',
     success: 'bg-green-50 border-green-200',
@@ -22,7 +24,7 @@ export default function Toast({ message, type = 'info', duration = 3000, onClose
 
   return (
     <div className={`fixed top-4 right-4 p-4 border rounded-lg ${bgColor} ${textColor} max-w-sm z-50 shadow-lg`}>
-      {message}
+      {text}
     </div>
   );
 }

@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.routes import api_router
 from app.config import get_settings
@@ -11,6 +14,10 @@ def create_application() -> FastAPI:
     setup_logging()
 
     app = FastAPI(title=settings.app_name)
+    project_root = Path(__file__).resolve().parents[1]
+    frontend_dist = project_root / "frontend" / "dist"
+    dist_index = frontend_dist / "index.html"
+    favicon_path = frontend_dist / "favicon.ico"
     
     # Add CORS middleware for development
     app.add_middleware(
@@ -29,6 +36,20 @@ def create_application() -> FastAPI:
     )
     
     app.include_router(api_router)
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon():
+        if favicon_path.exists():
+            return FileResponse(favicon_path)
+        raise HTTPException(status_code=404)
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str, request: Request):
+        # GET requests to page routes → serve SPA (index.html)
+        # Any request to unmatched API routes → 404
+        if dist_index.exists():
+            return FileResponse(dist_index)
+        raise HTTPException(status_code=404, detail="Frontend build not found")
     return app
 
 

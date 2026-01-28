@@ -11,7 +11,7 @@ from app.db.session import get_session
 from app.models.user import User
 from app.models.list import List as ListModel
 from app.models.adjective import Adjective
-from app.api.deps import require_user
+from app.api.deps import require_active_user
 
 
 router = APIRouter(prefix="/user/lists", tags=["user-lists"])
@@ -79,7 +79,7 @@ class AdjectiveUpdateRequest(BaseModel):
 @router.post("", response_model=ListResponse)
 async def create_list(
     request: ListCreateRequest,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Create a new custom list for the user."""
@@ -125,7 +125,7 @@ async def create_list(
 @router.get("/{listId}", response_model=ListResponse)
 async def get_list(
     listId: int,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Get a list with all its adjectives."""
@@ -180,7 +180,7 @@ async def get_list(
 async def update_list(
     listId: int,
     request: ListUpdateRequest,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Update a list (only owner can edit)."""
@@ -245,7 +245,7 @@ async def update_list(
 @router.delete("/{listId}")
 async def delete_list(
     listId: int,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Delete a list (only owner can delete)."""
@@ -271,7 +271,7 @@ async def delete_list(
 @router.get("/{listId}/adjectives", response_model=List[AdjectiveResponse])
 async def get_adjectives(
     listId: int,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Get all adjectives for a list."""
@@ -309,7 +309,7 @@ async def get_adjectives(
 async def create_adjective(
     listId: int,
     request: AdjectiveCreateRequest,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Add a new adjective to a list."""
@@ -361,7 +361,7 @@ async def update_adjective(
     listId: int,
     adjectiveId: int,
     request: AdjectiveUpdateRequest,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Update an adjective (inline auto-save)."""
@@ -414,7 +414,7 @@ async def update_adjective(
 async def delete_adjective(
     listId: int,
     adjectiveId: int,
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
     db: AsyncSession = Depends(get_session)
 ):
     """Delete an adjective from a list."""

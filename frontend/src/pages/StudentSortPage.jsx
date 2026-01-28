@@ -18,6 +18,10 @@ export default function StudentSortPage() {
   const { token } = useParams();
   const navigate = useNavigate();
   const { currentTheme } = useTheme();
+  
+  // Get listId from query params (e.g., ?listId=2)
+  const searchParams = new URLSearchParams(window.location.search);
+  const queryListId = searchParams.get('listId');
 
   // Map theme names for hex visualization
   const hexThemeMap = {
@@ -92,11 +96,24 @@ export default function StudentSortPage() {
               const maxAge = 24 * 60 * 60 * 1000; // 24 hours
               
               if (age < maxAge) {
-                // Restore state
+                // Restore adjectives and assignments from localStorage
+                // But create a new analytics session on the server (the old one may be gone after server restart)
+                console.log('[StudentSortPage] Restoring session, creating new analytics session on server');
+                
+                // Start a new analytics session
+                const sessionResponse = await analyticsApi.startSession(
+                  parsed.sessionState.listId === 'default' ? null : parsed.sessionState.listId,
+                  null // themeId
+                );
+                
+                // Restore state with new session ID
                 setAdjectives(parsed.adjectives);
-                setSessionState(parsed.sessionState);
+                setSessionState({
+                  ...parsed.sessionState,
+                  sessionId: sessionResponse.data.session_id, // Use new session ID from server
+                });
                 setLoading(false);
-                console.log('[StudentSortPage] Restored session from localStorage');
+                console.log('[StudentSortPage] Restored session from localStorage with new server session');
                 return;
               } else {
                 console.log('[StudentSortPage] Saved session expired, starting fresh');
@@ -104,8 +121,9 @@ export default function StudentSortPage() {
               }
             }
           } catch (err) {
-            console.error('[StudentSortPage] Failed to parse saved session:', err);
+            console.error('[StudentSortPage] Failed to restore saved session:', err);
             localStorage.removeItem(storageKey);
+            // Continue to load fresh session
           }
         }
 
@@ -113,25 +131,34 @@ export default function StudentSortPage() {
         // Determine which list to load and get adjectives
         let adjResponse;
         let listId;
+        let isDefaultList = true;
 
         if (token) {
           // Share link - use token to get public list
           console.log('[StudentSortPage] Using share token:', token);
           adjResponse = await shareApi.getPublicList(token);
           listId = adjResponse.data.id;
+          isDefaultList = false;
+        } else if (queryListId) {
+          // Custom list from query param (e.g., ?listId=2)
+          console.log('[StudentSortPage] Loading custom list:', queryListId);
+          adjResponse = await studentApi.getListAdjectives(queryListId);
+          listId = parseInt(queryListId, 10);
+          isDefaultList = false;
         } else {
-          // Default list - fetch from /student/default/adjectives
+          // Default list - fetch from /api/lists/default/adjectives
           console.log('[StudentSortPage] Fetching default adjectives');
           adjResponse = await studentApi.getDefaultAdjectives();
           listId = 'default';
+          isDefaultList = true;
         }
 
         console.log('[StudentSortPage] Got adjectives:', adjResponse.data.adjectives?.length);
         setAdjectives(adjResponse.data.adjectives || []);
 
-        // Initialize session
+        // Initialize session with the correct list ID
         const sessionResponse = await analyticsApi.startSession(
-          null, // listId - will use default
+          isDefaultList ? null : listId, // Pass actual listId for custom lists
           null // themeId - optional
         );
 
@@ -139,7 +166,7 @@ export default function StudentSortPage() {
           ...prev,
           sessionId: sessionResponse.data.session_id,
           listId,
-          isDefault: !token,
+          isDefault: isDefaultList,
           totalCount: adjResponse.data.adjectives?.length || 30,
         }));
       } catch (err) {
@@ -165,7 +192,7 @@ export default function StudentSortPage() {
     };
 
     loadSession();
-  }, [token]);
+  }, [token, queryListId]);
 
   // Save session state to localStorage whenever it changes
   useEffect(() => {

@@ -9,6 +9,17 @@ export default function AdminPendingPage() {
   const [toast, setToast] = useState(null);
   const [error, setError] = useState('');
 
+  const normalizeError = (err) => {
+    const detail = err?.response?.data?.detail || err?.message;
+    if (Array.isArray(detail)) {
+      return detail.map((d) => d.msg || d.detail || JSON.stringify(d)).join('; ');
+    }
+    if (detail && typeof detail === 'object') {
+      return detail.msg || detail.detail || JSON.stringify(detail);
+    }
+    return detail || 'Unbekannter Fehler';
+  };
+
   const loadData = async () => {
     setLoading(true);
     setError('');
@@ -20,7 +31,7 @@ export default function AdminPendingPage() {
       setPendingUsers(usersRes.data || []);
       setPendingSchools(schoolsRes.data || []);
     } catch (err) {
-      const message = err.response?.data?.detail || 'Konnte Pending-Listen nicht laden';
+      const message = normalizeError(err) || 'Konnte Pending-Listen nicht laden';
       setError(message);
       setToast({ message, type: 'error' });
     } finally {
@@ -35,15 +46,15 @@ export default function AdminPendingPage() {
   const handleUserAction = async (userId, action) => {
     try {
       if (action === 'approve') {
-        await adminAPI.approveUser(userId);
+        await adminAPI.approveUser(userId, {});
         setToast({ message: 'User freigeschaltet', type: 'success' });
       } else {
-        await adminAPI.rejectUser(userId);
+        await adminAPI.rejectUser(userId, {});
         setToast({ message: 'User abgelehnt', type: 'info' });
       }
       setPendingUsers((prev) => prev.filter((u) => u.id !== userId));
     } catch (err) {
-      const message = err.response?.data?.detail || 'Aktion fehlgeschlagen';
+      const message = normalizeError(err) || 'Aktion fehlgeschlagen';
       setToast({ message, type: 'error' });
     }
   };
@@ -51,15 +62,15 @@ export default function AdminPendingPage() {
   const handleSchoolAction = async (schoolId, action) => {
     try {
       if (action === 'approve') {
-        await adminAPI.approveSchool(schoolId);
+        await adminAPI.approveSchool(schoolId, {});
         setToast({ message: 'Schule freigeschaltet', type: 'success' });
       } else {
-        await adminAPI.rejectSchool(schoolId);
+        await adminAPI.rejectSchool(schoolId, {});
         setToast({ message: 'Schule abgelehnt', type: 'info' });
       }
       setPendingSchools((prev) => prev.filter((s) => s.id !== schoolId));
     } catch (err) {
-      const message = err.response?.data?.detail || 'Aktion fehlgeschlagen';
+      const message = normalizeError(err) || 'Aktion fehlgeschlagen';
       setToast({ message, type: 'error' });
     }
   };

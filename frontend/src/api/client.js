@@ -39,10 +39,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const url = error.config?.url || '';
-      const isAdminRoute = url.startsWith('/admin');
-      const target = isAdminRoute ? '/admin/login' : '/user/login';
-      window.location.href = target;
+      const url = (error.config?.url || '').split('?')[0];
+      const isSessionCheck = url === '/user/profile' || url === '/admin/profile';
+
+      // Allow public pages to stay accessible when the optional session check returns 401
+      if (!isSessionCheck) {
+        const isAdminRoute = url.startsWith('/admin');
+        const target = isAdminRoute ? '/admin/login' : '/user/login';
+        window.location.href = target;
+      }
     }
     return Promise.reject(error);
   }
@@ -150,7 +155,7 @@ export const listsApi = {
  */
 export const shareApi = {
   getPublicList: (shareToken) =>
-    api.get(`/l/${shareToken}`),
+    api.get(`/api/l/${shareToken}`),
 
   getShareLink: (listId) =>
     api.get(`/lists/${listId}/share`),

@@ -2,7 +2,7 @@
 from io import BytesIO
 
 import qrcode
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,7 @@ router = APIRouter(prefix="/user", tags=["qr"])
 @router.get("/lists/{listId}/qr")
 async def get_list_qr_code(
     listId: int,
+    request: Request,
     user: User = Depends(require_user),
     db: AsyncSession = Depends(get_session)
 ):
@@ -54,10 +55,10 @@ async def get_list_qr_code(
             detail="List sharing is not enabled"
         )
     
-    # Generate QR code
-    # URL format: /l/{token}
-    # In production, use full URL: https://vielseitig.zumgugger.ch/l/{token}
-    qr_url = f"https://vielseitig.zumgugger.ch/l/{list_obj.share_token}"
+    # Generate QR code with dynamic URL from request
+    # Get base URL from request (e.g., http://localhost:3000 or https://vielseitig.zumgugger.ch)
+    base_url = f"{request.url.scheme}://{request.url.netloc}"
+    qr_url = f"{base_url}/l/{list_obj.share_token}"
     
     qr = qrcode.QRCode(
         version=1,

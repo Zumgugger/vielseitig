@@ -96,13 +96,13 @@ export const analyticsApi = analyticsAPI;
 export const shareAPI = {
   // Public share endpoints
   getShareLinkData: (token) => 
-    api.get(`/l/${token}/data`),
+    api.get(`/api/l/${token}/data`),
   
   getDefaultList: () => 
-    api.get('/l'),
+    api.get('/api/l'),
 
   getPublicList: (token) =>
-    api.get(`/l/${token}`),
+    api.get(`/api/l/${token}`),
 };
 
 // Alias for backward compatibility
@@ -116,17 +116,17 @@ export const adminAPI = {
   getPendingSchools: () => 
     api.get('/admin/pending-schools'),
   
-  approveUser: (userId) => 
-    api.post(`/admin/users/${userId}/approve`),
+  approveUser: (userId, data = {}) => 
+    api.post(`/admin/users/${userId}/approve`, data),
   
-  rejectUser: (userId) => 
-    api.post(`/admin/users/${userId}/reject`),
+  rejectUser: (userId, data = {}) => 
+    api.post(`/admin/users/${userId}/reject`, data),
   
-  approveSchool: (schoolId) => 
-    api.post(`/admin/schools/${schoolId}/approve`),
+  approveSchool: (schoolId, data = {}) => 
+    api.post(`/admin/schools/${schoolId}/approve`, data),
   
-  rejectSchool: (schoolId) => 
-    api.post(`/admin/schools/${schoolId}/reject`),
+  rejectSchool: (schoolId, data = {}) => 
+    api.post(`/admin/schools/${schoolId}/reject`, data),
   
   // User management
   getUsers: () => 

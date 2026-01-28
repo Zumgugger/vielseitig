@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +13,7 @@ from app.models.user import User
 from app.models.adjective import Adjective
 
 
-router = APIRouter(prefix="/l", tags=["share"])
+router = APIRouter(prefix="/api/l", tags=["share"])
 
 
 class AdjectiveResponse(BaseModel):
@@ -45,9 +44,10 @@ async def get_share_link(
     db: AsyncSession = Depends(get_session)
 ):
     """
-    Resolve share link and redirect to student sorting view.
+    Get adjectives for a shared list (for student sorting view via QR code).
     
     Public endpoint - validates token, list ownership, and expiry.
+    Returns list data directly (no redirect).
     """
     # Find list by share token
     result = await db.execute(
@@ -102,9 +102,32 @@ async def get_share_link(
                     detail="Owner's school is not active"
                 )
     
-    # Redirect to student sorting view
-    # Frontend will use /sort?listId=<id> or /sort/<id>
-    return RedirectResponse(url=f"/sort?listId={list_obj.id}", status_code=302)
+    # Load adjectives
+    adj_result = await db.execute(
+        select(Adjective)
+        .where(Adjective.list_id == list_obj.id, Adjective.active == True)
+        .order_by(Adjective.order_index)
+    )
+    adjectives_data = adj_result.scalars().all()
+    
+    adjectives = [
+        AdjectiveResponse(
+            id=adj.id,
+            word=adj.word,
+            explanation=adj.explanation,
+            example=adj.example,
+            order_index=adj.order_index,
+            active=adj.active
+        )
+        for adj in adjectives_data
+    ]
+    
+    return ListShareResponse(
+        id=list_obj.id,
+        name=list_obj.name,
+        description=list_obj.description,
+        adjectives=adjectives
+    )
 
 
 @router.get("/{token}/data", response_model=ListShareResponse)
