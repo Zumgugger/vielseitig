@@ -203,7 +203,7 @@ async def get_user_lists(
             is_premium=True,
             adjective_count=adj_count,
             owner_email=None,
-            share_token=None,
+            share_token=premium_list.share_token,
             share_with_school=False,
             created_at=premium_list.created_at.isoformat() if premium_list.created_at else ""
         ))

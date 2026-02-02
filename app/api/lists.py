@@ -258,8 +258,8 @@ async def get_list(
     if not list_obj:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="List not found")
     
-    # Permission check: user must be owner or it must be shared with school
-    if not list_obj.is_default:
+    # Permission check: user must be owner, it must be shared with school, or it's a default/premium list
+    if not list_obj.is_default and not list_obj.is_premium:
         if list_obj.owner_user_id != user.id and not list_obj.share_with_school:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     
