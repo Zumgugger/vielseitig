@@ -8,7 +8,7 @@ from app.config import get_settings
 router = APIRouter(tags=["health"])
 
 
-@router.get("/", response_class=HTMLResponse)
+@router.get("/api", response_class=HTMLResponse)
 async def root():
     """Root landing page with API information."""
     return """
