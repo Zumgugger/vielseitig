@@ -16,8 +16,8 @@ coverage/
 
 # Environment files
 .env
-.env.*
 .env.local
+!.env.production.example
 
 # SQLite
 *.db
