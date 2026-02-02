@@ -12,7 +12,7 @@ services:
       - ./data:/app/data
     environment:
       - SECRET_KEY=${SECRET_KEY:-changeme-in-production}
-      - DATABASE_URL=sqlite:///./data/vielseitig.db
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./data/vielseitig.db}
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
       - TWILIO_FROM_NUMBER=${TWILIO_FROM_NUMBER:-}
