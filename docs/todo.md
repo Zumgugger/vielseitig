@@ -1050,12 +1050,12 @@
 
 ---
 
-## Implementation Status Summary (as of 2026-01-27)
+## Implementation Status Summary (as of 2026-02-02)
 
 ### ✅ Completed
 - Backend: All core endpoints, authentication, user/admin management, analytics tracking, PDF generation
 - Frontend: React + Vite + Tailwind setup, Theme system (6 themes), Auth context
-- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage (working!)**, **StudentResultsPage (complete!)**, **UserListsPage, UserListEditorPage, UserProfilePage**
+- Frontend Pages: HomePage, UserLoginPage, UserRegisterPage, AdminLoginPage, **StudentSortPage**, **StudentResultsPage**, **UserListsPage, UserListEditorPage, UserProfilePage**
 - Shared Components: Button, Input, Header, Footer, Toast, Loading
 - Student Sorting: Fully functional with keyboard controls (A/S/D, Space, I), progress tracking, overlay with shortcuts
 - API Client: Axios setup with all necessary endpoints for sorting and PDF export
@@ -1067,9 +1067,10 @@
 - **Admin Area: Pending Inbox, User/SCHOOL lists, Analytics summary + sessions table**
 - **QR Codes: Backend generation + UI preview/download in list overview and editor**
 - **Auth Guards: Session validation on app load, protected admin/user routes, unified login handling**
-- **API Client: Consolidated endpoints with analytics, student, share, admin, and auth APIs**
 - **Keyboard Controls: Full A/S/D shortcuts, Space for explanation, I for info overlay**
 - **Inline Editing: Auto-save with debounce, optimistic updates, error handling**
+- **Premium Lists: 4 additional lists (Grosse Liste 50, Sport 40, Selbstkompetenz 40, Sozialkompetenz 40) with QR sharing**
+- **Makefile: VENV auto-activation for all make commands**
 
 ### 🔄 In Progress
 - None currently
@@ -1077,7 +1078,6 @@
 ### ⏳ Pending (High Priority)
 1. **Section 13.16-13.17**: Admin standard list editor + admin profile/logout
 2. **Section 6.4**: Copy-on-write for school-shared lists
-3. **Commit tasks**: Pending git commits for sections 13.9.1, 13.15.1
 
 ### ⚠️ Known Limitations
 - Drag-and-drop/Undo für Sortieren nicht implementiert (optional)
@@ -1086,5 +1086,79 @@
 - Copy-on-write für schul-geteilte Listen noch offen
 - Impressum/Datenschutz Seiten enthalten noch Platzhaltertext; finalen Betreibertext einsetzen
 
-**Status: Core Student Experience Complete - User/Admin Management Pages Next**
-**Last Updated: 2026-01-27**
+**Status: Ready for Classroom Pilot Testing**
+**Last Updated: 2026-02-02**
+
+---
+
+## 🚀 Pre-Deployment Checklist (Classroom Test with 20 Students)
+
+### ✅ Ready - No Action Required
+- [x] Student sorting flow (30 adjectives with A/S/D keys)
+- [x] Hexagon visualization with 6 color themes
+- [x] PDF export (downloads as "ich-bin-vielseitig.pdf")
+- [x] Standard list with 30 adjectives seeded
+- [x] Premium lists (4 additional lists for registered teachers)
+- [x] QR code generation for share links
+- [x] Mobile-responsive design
+- [x] Keyboard shortcuts (A/S/D, Space, I for info)
+- [x] Session state persistence (survives page refresh)
+
+### ⚠️ Required Before Deployment
+
+#### Server & Infrastructure
+- [ ] **Deploy to production server** (vielseitig.zumgugger.ch)
+  - [ ] Set up Docker container or direct Python deployment
+  - [ ] Configure Apache2 reverse proxy
+  - [ ] Set up HTTPS with Let's Encrypt
+  - [ ] Ensure SQLite database is persistent (volume mount)
+
+#### Environment Configuration
+- [ ] **Create production .env file** with:
+  - [ ] `SECRET_KEY` - secure random string for sessions
+  - [ ] `TWILIO_*` credentials (optional, for SMS notifications)
+  - [ ] `DATABASE_URL` pointing to persistent SQLite file
+
+#### Database Setup
+- [ ] **Run migrations**: `make migrate`
+- [ ] **Seed database**: `make seed` (creates standard list + premium lists + admin account)
+- [ ] **Change admin password** from default "changeme"
+
+#### Pre-Test Verification
+- [ ] **Test the full student flow**:
+  1. Go to `/` (homepage)
+  2. Click "Jetzt starten" → sorts 30 adjectives
+  3. Complete sorting → see hexagon result
+  4. Download PDF → file downloads correctly
+- [ ] **Test QR code flow**:
+  1. Scan QR code with phone → loads correctly
+  2. Complete sorting on mobile → works smoothly
+
+### 📋 Teacher Setup (if using custom lists)
+- [ ] Register teacher account at `/user/register`
+- [ ] Approve account in admin panel (`/admin/pending`)
+- [ ] Create custom list or use premium list
+- [ ] Generate QR code for students
+
+### 🎯 Student Instructions (for class)
+1. Scan QR code or visit URL
+2. Sort adjectives using:
+   - **A** = Selten (rarely)
+   - **S** = Manchmal (sometimes)  
+   - **D** = Oft (often)
+   - **Space** = Show explanation
+3. After all 30: choose a color theme
+4. Click "PDF herunterladen" to save result
+
+### ⚡ Performance Notes
+- Supports 20+ simultaneous students (SQLite handles concurrent reads well)
+- Each session creates ~30 database entries (lightweight)
+- PDF generation is server-side, ~1-2 seconds per export
+
+### 🔧 Quick Troubleshooting
+| Issue | Solution |
+|-------|----------|
+| QR code not loading | Check HTTPS is working |
+| PDF not downloading | Check browser allows downloads |
+| Session lost on refresh | Clear localStorage, restart |
+| Slow loading | Check server resources |

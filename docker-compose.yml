@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  vielseitig:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vielseitig-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      # Persist SQLite database
+      - ./data:/app/data
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-changeme-in-production}
+      - DATABASE_URL=sqlite:///./data/vielseitig.db
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID:-}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
+      - TWILIO_FROM_NUMBER=${TWILIO_FROM_NUMBER:-}
+      - ADMIN_PHONE_NUMBER=${ADMIN_PHONE_NUMBER:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Optional: Add volume for named volume instead of bind mount
+# volumes:
+#   vielseitig-data:
