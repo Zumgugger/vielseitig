@@ -39,8 +39,10 @@ class UserProfileResponse(BaseModel):
 class ListSummary(BaseModel):
     id: int
     name: str
+    slug: Optional[str]
     description: Optional[str]
     is_default: bool
+    is_premium: bool
     adjective_count: int
     owner_email: Optional[str]
     share_token: Optional[str]
@@ -157,16 +159,9 @@ async def get_user_lists(
     )
     standard_list = standard_result.scalar_one_or_none()
     
+    from app.models.adjective import Adjective
+    
     if standard_list:
-        # Count adjectives
-        adj_result = await db.execute(
-            select(ListModel).where(ListModel.id == standard_list.id)
-        )
-        adjectives = await db.execute(
-            select(ListModel).where(ListModel.id == standard_list.id)
-        )
-        
-        from app.models.adjective import Adjective
         adj_count_result = await db.execute(
             select(Adjective).where(Adjective.list_id == standard_list.id)
         )
@@ -175,8 +170,10 @@ async def get_user_lists(
         lists.append(ListSummary(
             id=standard_list.id,
             name=standard_list.name,
+            slug=standard_list.slug,
             description=standard_list.description,
             is_default=True,
+            is_premium=False,
             adjective_count=adj_count,
             owner_email=None,
             share_token=None,
@@ -184,11 +181,37 @@ async def get_user_lists(
             created_at=standard_list.created_at.isoformat() if standard_list.created_at else ""
         ))
     
-    # 2. Add user's own custom lists
-    from app.models.adjective import Adjective
+    # 2. Add premium lists (available to all registered users)
+    premium_lists_result = await db.execute(
+        select(ListModel).where(ListModel.is_premium == True)  # noqa: E712
+        .order_by(ListModel.name)
+    )
+    premium_lists = premium_lists_result.scalars().all()
+    
+    for premium_list in premium_lists:
+        adj_count_result = await db.execute(
+            select(Adjective).where(Adjective.list_id == premium_list.id)
+        )
+        adj_count = len(adj_count_result.scalars().all())
+        
+        lists.append(ListSummary(
+            id=premium_list.id,
+            name=premium_list.name,
+            slug=premium_list.slug,
+            description=premium_list.description,
+            is_default=False,
+            is_premium=True,
+            adjective_count=adj_count,
+            owner_email=None,
+            share_token=None,
+            share_with_school=False,
+            created_at=premium_list.created_at.isoformat() if premium_list.created_at else ""
+        ))
+    
+    # 3. Add user's own custom lists
     own_lists_result = await db.execute(
         select(ListModel).where(
-            and_(ListModel.owner_user_id == user.id, ListModel.is_default == False)
+            and_(ListModel.owner_user_id == user.id, ListModel.is_default == False)  # noqa: E712
         ).order_by(ListModel.created_at.desc())
     )
     own_lists = own_lists_result.scalars().all()
@@ -202,8 +225,10 @@ async def get_user_lists(
         lists.append(ListSummary(
             id=own_list.id,
             name=own_list.name,
+            slug=own_list.slug,
             description=own_list.description,
             is_default=False,
+            is_premium=False,
             adjective_count=adj_count,
             owner_email=user.email,
             share_token=own_list.share_token,
@@ -211,13 +236,14 @@ async def get_user_lists(
             created_at=own_list.created_at.isoformat() if own_list.created_at else ""
         ))
     
-    # 3. Add lists shared with user's school
+    # 4. Add lists shared with user's school
     shared_lists_result = await db.execute(
         select(ListModel).where(
             and_(
-                ListModel.share_with_school == True,
+                ListModel.share_with_school == True,  # noqa: E712
                 ListModel.owner_user_id != user.id,  # Don't include own lists again
-                ListModel.is_default == False
+                ListModel.is_default == False,  # noqa: E712
+                ListModel.is_premium == False  # noqa: E712  # Don't include premium lists again
             )
         ).order_by(ListModel.created_at.desc())
     )
@@ -238,8 +264,10 @@ async def get_user_lists(
         lists.append(ListSummary(
             id=shared_list.id,
             name=shared_list.name,
+            slug=shared_list.slug,
             description=shared_list.description,
             is_default=False,
+            is_premium=False,
             adjective_count=adj_count,
             owner_email=owner.email if owner else None,
             share_token=shared_list.share_token,

@@ -13,8 +13,10 @@ class List(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
+    slug: Mapped[Optional[str]] = mapped_column(String(100), unique=True, nullable=True, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    is_premium: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     owner_user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     share_token: Mapped[Optional[str]] = mapped_column(String(64), unique=True, nullable=True, index=True)
     share_expires_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
@@ -34,4 +36,4 @@ class List(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<List(id={self.id}, name={self.name!r}, is_default={self.is_default})>"
+        return f"<List(id={self.id}, name={self.name!r}, is_default={self.is_default}, is_premium={self.is_premium})>"

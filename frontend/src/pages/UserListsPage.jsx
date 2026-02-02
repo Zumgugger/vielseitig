@@ -56,9 +56,10 @@ export default function UserListsPage() {
 
   const orderedLists = useMemo(() => {
     const standard = lists.filter((l) => l.is_default);
-    const own = lists.filter((l) => !l.is_default && l.owner_email === profile?.email);
-    const shared = lists.filter((l) => !l.is_default && l.owner_email !== profile?.email);
-    return [...standard, ...own, ...shared];
+    const premium = lists.filter((l) => l.is_premium);
+    const own = lists.filter((l) => !l.is_default && !l.is_premium && l.owner_email === profile?.email);
+    const shared = lists.filter((l) => !l.is_default && !l.is_premium && l.owner_email !== profile?.email);
+    return [...standard, ...premium, ...own, ...shared];
   }, [lists, profile?.email]);
 
   const handleCreateList = async (event) => {
@@ -246,11 +247,15 @@ export default function UserListsPage() {
                   const isOwn = profile?.email && list.owner_email === profile.email;
                   const typeLabel = list.is_default
                     ? 'Standard'
+                    : list.is_premium
+                    ? 'Premium'
                     : isOwn
                     ? 'Eigen'
                     : 'Schule';
                   const typeTone = list.is_default
                     ? 'neutral'
+                    : list.is_premium
+                    ? 'warning'
                     : isOwn
                     ? 'success'
                     : 'info';
@@ -297,7 +302,7 @@ export default function UserListsPage() {
                             Teilen
                           </a>
                         )}
-                        {isOwn && list.share_token && (
+                        {(isOwn || list.is_premium) && list.share_token && (
                           <Button
                             variant="ghost"
                             size="sm"

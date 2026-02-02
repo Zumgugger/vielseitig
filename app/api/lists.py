@@ -32,8 +32,10 @@ class AdjectiveResponse(BaseModel):
 class ListResponse(BaseModel):
     id: int
     name: str
+    slug: Optional[str]
     description: Optional[str]
     is_default: bool
+    is_premium: bool
     owner_user_id: Optional[int]
     share_token: Optional[str]
     share_expires_at: Optional[datetime]
@@ -42,6 +44,20 @@ class ListResponse(BaseModel):
     adjectives: List[AdjectiveResponse]
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ListSummaryResponse(BaseModel):
+    """Lightweight list response without adjectives."""
+    id: int
+    name: str
+    slug: Optional[str]
+    description: Optional[str]
+    is_default: bool
+    is_premium: bool
+    adjective_count: int
 
     class Config:
         from_attributes = True
@@ -73,6 +89,110 @@ class AdjectiveUpdateRequest(BaseModel):
     order_index: Optional[int] = None
 
 
+# ============ PREMIUM LISTS (for registered users) ============
+
+
+@router.get("/premium", response_model=List[ListSummaryResponse])
+async def get_premium_lists(
+    user: User = Depends(require_active_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Get all available premium lists.
+    
+    Premium lists are only accessible to registered users.
+    Returns a summary without adjectives for overview.
+    """
+    from sqlalchemy import func
+    
+    # Get premium lists with adjective count
+    result = await db.execute(
+        select(ListModel)
+        .where(ListModel.is_premium == True)  # noqa: E712
+        .order_by(ListModel.name)
+    )
+    lists = result.scalars().all()
+    
+    response = []
+    for lst in lists:
+        # Count adjectives
+        count_result = await db.execute(
+            select(func.count(Adjective.id))
+            .where(Adjective.list_id == lst.id, Adjective.active == True)  # noqa: E712
+        )
+        adj_count = count_result.scalar() or 0
+        
+        response.append(ListSummaryResponse(
+            id=lst.id,
+            name=lst.name,
+            slug=lst.slug,
+            description=lst.description,
+            is_default=lst.is_default,
+            is_premium=lst.is_premium,
+            adjective_count=adj_count
+        ))
+    
+    return response
+
+
+@router.get("/premium/{slug}", response_model=ListResponse)
+async def get_premium_list_by_slug(
+    slug: str,
+    user: User = Depends(require_active_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Get a premium list by slug with all its adjectives.
+    
+    Premium lists are only accessible to registered users.
+    """
+    result = await db.execute(
+        select(ListModel)
+        .where(ListModel.slug == slug, ListModel.is_premium == True)  # noqa: E712
+    )
+    list_obj = result.scalar_one_or_none()
+    
+    if not list_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Premium list not found")
+    
+    # Load adjectives
+    adj_result = await db.execute(
+        select(Adjective)
+        .where(Adjective.list_id == list_obj.id, Adjective.active == True)  # noqa: E712
+        .order_by(Adjective.order_index)
+    )
+    adjectives_data = adj_result.scalars().all()
+    
+    adjectives = [
+        AdjectiveResponse(
+            id=adj.id,
+            word=adj.word,
+            explanation=adj.explanation,
+            example=adj.example,
+            order_index=adj.order_index,
+            active=adj.active
+        )
+        for adj in adjectives_data
+    ]
+    
+    return ListResponse(
+        id=list_obj.id,
+        name=list_obj.name,
+        slug=list_obj.slug,
+        description=list_obj.description,
+        is_default=list_obj.is_default,
+        is_premium=list_obj.is_premium,
+        owner_user_id=list_obj.owner_user_id,
+        share_token=list_obj.share_token,
+        share_expires_at=list_obj.share_expires_at,
+        share_with_school=list_obj.share_with_school,
+        source_list_id=list_obj.source_list_id,
+        adjectives=adjectives,
+        created_at=list_obj.created_at,
+        updated_at=list_obj.updated_at
+    )
+
+
 # ============ LIST CRUD ============
 
 
@@ -91,6 +211,7 @@ async def create_list(
         name=request.name,
         description=request.description,
         is_default=False,
+        is_premium=False,
         owner_user_id=user.id,
         share_token=share_token,
         share_expires_at=share_expires_at,
@@ -109,8 +230,10 @@ async def create_list(
     return ListResponse(
         id=new_list.id,
         name=new_list.name,
+        slug=new_list.slug,
         description=new_list.description,
         is_default=new_list.is_default,
+        is_premium=new_list.is_premium,
         owner_user_id=new_list.owner_user_id,
         share_token=new_list.share_token,
         share_expires_at=new_list.share_expires_at,
@@ -163,8 +286,10 @@ async def get_list(
     return ListResponse(
         id=list_obj.id,
         name=list_obj.name,
+        slug=list_obj.slug,
         description=list_obj.description,
         is_default=list_obj.is_default,
+        is_premium=list_obj.is_premium,
         owner_user_id=list_obj.owner_user_id,
         share_token=list_obj.share_token,
         share_expires_at=list_obj.share_expires_at,
@@ -229,8 +354,10 @@ async def update_list(
     return ListResponse(
         id=list_obj.id,
         name=list_obj.name,
+        slug=list_obj.slug,
         description=list_obj.description,
         is_default=list_obj.is_default,
+        is_premium=list_obj.is_premium,
         owner_user_id=list_obj.owner_user_id,
         share_token=list_obj.share_token,
         share_expires_at=list_obj.share_expires_at,

@@ -1,5 +1,8 @@
 .PHONY: help dev dev-backend run test lint format clean migrate seed kill-ports
 
+# Activate venv for all commands
+VENV := . .venv/bin/activate &&
+
 help:
 	@echo "Available commands:"
 	@echo "  make dev          - Start backend (uvicorn) and frontend (vite) dev servers"
@@ -16,7 +19,7 @@ help:
 dev:
 	$(MAKE) kill-ports >/dev/null
 	bash -c 'set -e; trap "kill 0" INT TERM EXIT; \
-		(.venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000) & \
+		($(VENV) uvicorn app.main:app --reload --host 0.0.0.0 --port 8000) & \
 		(cd frontend && npm run dev -- --host 0.0.0.0 --port 3000) & \
 		wait'
 
@@ -33,19 +36,19 @@ kill-ports:
 	done
 
 dev-backend:
-	.venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	$(VENV) uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 run:
-	.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+	$(VENV) uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 test:
-	.venv/bin/pytest -v
+	$(VENV) pytest -v
 
 lint:
-	.venv/bin/flake8 app/ --max-line-length=120 --exclude=__pycache__,*.pyc,.venv
+	$(VENV) flake8 app/ --max-line-length=120 --exclude=__pycache__,*.pyc,.venv
 
 format:
-	.venv/bin/black app/ --line-length=120
+	$(VENV) black app/ --line-length=120
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -54,7 +57,7 @@ clean:
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 
 migrate:
-	.venv/bin/alembic upgrade head
+	$(VENV) alembic upgrade head
 
 seed:
-	.venv/bin/python -m app.db.seed
+	$(VENV) python -m app.db.seed
