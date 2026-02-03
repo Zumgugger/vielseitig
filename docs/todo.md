@@ -1125,7 +1125,7 @@
    - **S** = Manchmal (sometimes)  
    - **D** = Oft (often)
    - **Space** = Show explanation
-3. After all 30: choose a color theme
+3. After all 30: choose a color theme and rearrange the hexagons until you're happy with the design
 4. Click "PDF herunterladen" to save result
 
 ### ⚡ Performance Notes

@@ -35,6 +35,7 @@ export default function StudentResultsPage() {
   // Get state from navigation (passed from StudentSortPage)
   const [sessionData, setSessionData] = useState(null);
   const [randomSeed, setRandomSeed] = useState(Date.now());
+  const [showInfo, setShowInfo] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const [isExportingPdf, setIsExportingPdf] = useState(false);
 
@@ -177,6 +178,26 @@ export default function StudentResultsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8 px-4">
+      {/* Info Overlay */}
+      {showInfo && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="card max-w-md">
+            <h2 className="text-2xl font-bold mb-4">Ergebnisse anschauen</h2>
+            <ul className="space-y-2 text-sm mb-6">
+              <li><strong>🎨 Farbschema</strong> – Wähle ein Design, das dir gefällt</li>
+              <li><strong>🔄 Anders anordnen</strong> – Verändere die Anordnung der Hexagone</li>
+              <li><strong>📄 PDF herunterladen</strong> – Speichere dein Ergebnis als PDF</li>
+            </ul>
+            <p className="text-sm text-gray-600 mb-6">
+              Probiere verschiedene Farben und Anordnungen aus, bis du mit dem Design zufrieden bist!
+            </p>
+            <Button variant="primary" onClick={() => setShowInfo(false)} className="w-full">
+              Verstanden!
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto" ref={resultsRef}>
         {/* Header */}
         <div className="text-center mb-8">
@@ -211,7 +232,15 @@ export default function StudentResultsPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setShowInfo(true)}
+                className="whitespace-nowrap"
+                title="Hinweise anzeigen"
+              >
+                ℹ️
+              </Button>
               <Button
                 variant="secondary"
                 onClick={handleReshuffle}
