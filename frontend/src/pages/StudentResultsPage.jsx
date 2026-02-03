@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Button, HexagonGrid, Loading, Toast } from '../components';
 import { useTheme } from '../store/ThemeContext';
 import { studentApi } from '../api';
@@ -36,8 +36,13 @@ export default function StudentResultsPage() {
   const [sessionData, setSessionData] = useState(null);
   const [randomSeed, setRandomSeed] = useState(Date.now());
   const [showInfo, setShowInfo] = useState(true);
+  const [showPdfInfo, setShowPdfInfo] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  // Check if this is a default list (no PDF export allowed without license)
+  const isDefaultList = sessionData?.isDefault ?? true;
+  const canExportPdf = !isDefaultList; // Custom lists (via share token) can export
 
   useEffect(() => {
     // Get data from sessionStorage (more reliable than location.state)
@@ -198,6 +203,45 @@ export default function StudentResultsPage() {
         </div>
       )}
 
+      {/* PDF License Info Overlay */}
+      {showPdfInfo && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="card max-w-md">
+            <div className="text-center mb-4">
+              <span className="text-5xl">🔒</span>
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-center">PDF nur mit Schul-Lizenz</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Der PDF-Export ist nur für Schüler:innen verfügbar, deren Lehrperson einen 
+              <strong> eigenen Link</strong> erstellt hat.
+            </p>
+            <p className="text-sm text-gray-600 mb-6">
+              Bist du Lehrperson? Registriere dich kostenlos, um:
+            </p>
+            <ul className="text-sm text-gray-600 mb-6 space-y-2">
+              <li>✅ PDF-Export für deine Klasse freizuschalten</li>
+              <li>✅ Eigene Adjektiv-Listen zu erstellen</li>
+              <li>✅ QR-Codes für einfaches Teilen zu generieren</li>
+              <li>✅ Zugang zu Premium-Listen zu erhalten</li>
+            </ul>
+            <div className="flex flex-col gap-3">
+              <Link to="/user/register" className="w-full">
+                <Button variant="primary" className="w-full">
+                  🎓 Jetzt als Lehrperson registrieren
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPdfInfo(false)} 
+                className="w-full"
+              >
+                Schließen
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto" ref={resultsRef}>
         {/* Header */}
         <div className="text-center mb-8">
@@ -248,20 +292,31 @@ export default function StudentResultsPage() {
               >
                 🔄 Anders anordnen
               </Button>
-              <Button
-                variant="accent"
-                onClick={handleExportPdf}
-                disabled={isExportingPdf}
-                className="whitespace-nowrap"
-              >
-                {isExportingPdf ? '⏳ Erstelle PDF...' : '📄 PDF herunterladen'}
-              </Button>
+              {canExportPdf ? (
+                <Button
+                  variant="accent"
+                  onClick={handleExportPdf}
+                  disabled={isExportingPdf}
+                  className="whitespace-nowrap"
+                >
+                  {isExportingPdf ? '⏳ Erstelle PDF...' : '📄 PDF herunterladen'}
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPdfInfo(true)}
+                  className="whitespace-nowrap text-gray-400 border-gray-300"
+                  title="PDF nur mit Schul-Lizenz"
+                >
+                  🔒 PDF herunterladen
+                </Button>
+              )}
               <Button
                 variant="primary"
                 onClick={handleNewSession}
                 className="whitespace-nowrap"
               >
-                ✨ Nochmal sortieren
+                ✨ Neu beginnen
               </Button>
             </div>
           </div>

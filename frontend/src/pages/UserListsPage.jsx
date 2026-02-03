@@ -9,11 +9,30 @@ function Badge({ label, tone = 'info' }) {
     success: 'bg-green-100 text-green-800',
     warning: 'bg-amber-100 text-amber-800',
     neutral: 'bg-gray-100 text-gray-800',
+    danger: 'bg-red-100 text-red-800',
   };
 
   return (
     <span className={`badge ${tones[tone] || tones.info}`}>{label}</span>
   );
+}
+
+// Helper to check share token expiry status
+function getShareExpiryStatus(expiresAt) {
+  if (!expiresAt) return null;
+  
+  const now = new Date();
+  const expiry = new Date(expiresAt);
+  const daysRemaining = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+  
+  if (daysRemaining <= 0) {
+    return { status: 'expired', label: 'Abgelaufen', tone: 'danger', daysRemaining: 0 };
+  } else if (daysRemaining <= 30) {
+    return { status: 'expiring', label: `${daysRemaining} Tage`, tone: 'warning', daysRemaining };
+  } else if (daysRemaining <= 90) {
+    return { status: 'soon', label: `${daysRemaining} Tage`, tone: 'info', daysRemaining };
+  }
+  return { status: 'valid', label: `${daysRemaining} Tage`, tone: 'success', daysRemaining };
 }
 
 export default function UserListsPage() {
@@ -31,6 +50,7 @@ export default function UserListsPage() {
   });
   const [qrLoadingId, setQrLoadingId] = useState(null);
   const [qrPreview, setQrPreview] = useState(null);
+  const [regeneratingId, setRegeneratingId] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -103,6 +123,32 @@ export default function UserListsPage() {
       setToast({ message: 'Share-Link kopiert', type: 'success' });
     } catch (err) {
       setToast({ message: 'Konnte Link nicht kopieren', type: 'error' });
+    }
+  };
+
+  const handleRegenerateToken = async (listId) => {
+    if (!listId) return;
+    setRegeneratingId(listId);
+    try {
+      const response = await listsAPI.regenerateShareToken(listId);
+      // Update the list in state with new token and expiry
+      setLists((prev) =>
+        prev.map((list) =>
+          list.id === listId
+            ? {
+                ...list,
+                share_token: response.data.share_token,
+                share_expires_at: response.data.share_expires_at,
+              }
+            : list
+        )
+      );
+      setToast({ message: 'Share-Link erneuert (gültig für 1 Jahr)', type: 'success' });
+    } catch (err) {
+      const message = err.response?.data?.detail || 'Link konnte nicht erneuert werden';
+      setToast({ message, type: 'error' });
+    } finally {
+      setRegeneratingId(null);
     }
   };
 
@@ -274,15 +320,43 @@ export default function UserListsPage() {
                       <td>{list.adjective_count ?? list.adjectives?.length ?? 0}</td>
                       <td className="space-y-1">
                         {list.share_with_school && <Badge label="Schule" tone="info" />}
-                        {list.share_token && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyShareLink(list.share_token)}
-                          >
-                            Link kopieren
-                          </Button>
-                        )}
+                        {list.share_token && (() => {
+                          const expiryStatus = getShareExpiryStatus(list.share_expires_at);
+                          return (
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => copyShareLink(list.share_token)}
+                                  disabled={expiryStatus?.status === 'expired'}
+                                  title={expiryStatus?.status === 'expired' ? 'Link abgelaufen' : 'Link kopieren'}
+                                >
+                                  {expiryStatus?.status === 'expired' ? '⚠️' : '📋'} Link kopieren
+                                </Button>
+                              </div>
+                              {expiryStatus && (
+                                <div className="flex items-center gap-1 text-xs">
+                                  <Badge 
+                                    label={expiryStatus.status === 'expired' ? '❌ Abgelaufen' : `⏱️ ${expiryStatus.label}`} 
+                                    tone={expiryStatus.tone} 
+                                  />
+                                  {isOwn && (expiryStatus.status === 'expired' || expiryStatus.status === 'expiring') && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleRegenerateToken(list.id)}
+                                      disabled={regeneratingId === list.id}
+                                      className="text-xs"
+                                    >
+                                      {regeneratingId === list.id ? '...' : '🔄 Erneuern'}
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                         {!list.share_token && <span className="text-sm text-gray-500">kein Link</span>}
                       </td>
                       <td className="text-sm text-gray-600">

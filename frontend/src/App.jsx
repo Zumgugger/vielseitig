@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import './styles/index.css';
 
 // Context providers
@@ -8,24 +9,48 @@ import { AuthProvider, useAuth } from './store/AuthContext';
 // Layout components
 import { AppHeader, AppFooter, Loading } from './components';
 
-// Pages
+// Core pages (always loaded)
 import HomePage from './pages/HomePage';
 import StudentSortPage from './pages/StudentSortPage';
 import StudentResultsPage from './pages/StudentResultsPage';
+
+// Auth pages (small, load eagerly)
 import UserLoginPage from './pages/UserLoginPage';
 import UserRegisterPage from './pages/UserRegisterPage';
 import AdminLoginPage from './pages/AdminLoginPage';
-import UserListsPage from './pages/UserListsPage';
-import UserListEditorPage from './pages/UserListEditorPage';
-import UserProfilePage from './pages/UserProfilePage';
-import AdminPendingPage from './pages/AdminPendingPage';
-import AdminUsersPage from './pages/AdminUsersPage';
-import AdminSchoolsPage from './pages/AdminSchoolsPage';
-import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
-import AdminStandardListPage from './pages/AdminStandardListPage';
-import AdminProfilePage from './pages/AdminProfilePage';
-import ImpressumPage from './pages/ImpressumPage';
-import DatenschutzPage from './pages/DatenschutzPage';
+
+// Legal pages (rarely accessed, lazy load)
+const ImpressumPage = lazy(() => import('./pages/ImpressumPage'));
+const DatenschutzPage = lazy(() => import('./pages/DatenschutzPage'));
+
+// User pages (lazy load for better initial load)
+const UserListsPage = lazy(() => import('./pages/UserListsPage'));
+const UserListEditorPage = lazy(() => import('./pages/UserListEditorPage'));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+
+// Admin pages (lazy load - not needed for students)
+const AdminPendingPage = lazy(() => import('./pages/AdminPendingPage'));
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const AdminSchoolsPage = lazy(() => import('./pages/AdminSchoolsPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/AdminAnalyticsPage'));
+const AdminStandardListPage = lazy(() => import('./pages/AdminStandardListPage'));
+const AdminProfilePage = lazy(() => import('./pages/AdminProfilePage'));
+
+// Loading skeleton for lazy-loaded pages
+function PageSkeleton() {
+  return (
+    <div className="min-h-[60vh] animate-pulse">
+      <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
+      <div className="h-4 bg-gray-200 rounded w-2/3 mb-8" />
+      <div className="card">
+        <div className="h-4 bg-gray-200 rounded w-full mb-3" />
+        <div className="h-4 bg-gray-200 rounded w-5/6 mb-3" />
+        <div className="h-4 bg-gray-200 rounded w-4/6 mb-3" />
+        <div className="h-10 bg-gray-200 rounded w-32 mt-6" />
+      </div>
+    </div>
+  );
+}
 
 function RequireUser({ children }) {
   const { user, isInitializing } = useAuth();
@@ -57,8 +82,8 @@ function AppContent() {
           <Route path="/l/:token" element={<StudentSortPage />} />
           <Route path="/results" element={<StudentResultsPage />} />
           <Route path="/results/:token" element={<StudentResultsPage />} />
-          <Route path="/impressum" element={<ImpressumPage />} />
-          <Route path="/datenschutz" element={<DatenschutzPage />} />
+          <Route path="/impressum" element={<Suspense fallback={<PageSkeleton />}><ImpressumPage /></Suspense>} />
+          <Route path="/datenschutz" element={<Suspense fallback={<PageSkeleton />}><DatenschutzPage /></Suspense>} />
           
           {/* Auth routes */}
           <Route path="/user/login" element={<UserLoginPage />} />
@@ -67,7 +92,9 @@ function AppContent() {
             path="/user/profile"
             element={(
               <RequireUser>
-                <UserProfilePage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <UserProfilePage />
+                </Suspense>
               </RequireUser>
             )}
           />
@@ -75,7 +102,9 @@ function AppContent() {
             path="/user/lists"
             element={(
               <RequireUser>
-                <UserListsPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <UserListsPage />
+                </Suspense>
               </RequireUser>
             )}
           />
@@ -83,7 +112,9 @@ function AppContent() {
             path="/user/lists/:listId"
             element={(
               <RequireUser>
-                <UserListEditorPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <UserListEditorPage />
+                </Suspense>
               </RequireUser>
             )}
           />
@@ -92,7 +123,9 @@ function AppContent() {
             path="/admin/pending"
             element={(
               <RequireAdmin>
-                <AdminPendingPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminPendingPage />
+                </Suspense>
               </RequireAdmin>
             )}
           />
@@ -100,7 +133,9 @@ function AppContent() {
             path="/admin/users"
             element={(
               <RequireAdmin>
-                <AdminUsersPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminUsersPage />
+                </Suspense>
               </RequireAdmin>
             )}
           />
@@ -108,7 +143,9 @@ function AppContent() {
             path="/admin/schools"
             element={(
               <RequireAdmin>
-                <AdminSchoolsPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminSchoolsPage />
+                </Suspense>
               </RequireAdmin>
             )}
           />
@@ -116,7 +153,9 @@ function AppContent() {
             path="/admin/analytics"
             element={(
               <RequireAdmin>
-                <AdminAnalyticsPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminAnalyticsPage />
+                </Suspense>
               </RequireAdmin>
             )}
           />
@@ -124,7 +163,9 @@ function AppContent() {
             path="/admin/standard-list"
             element={(
               <RequireAdmin>
-                <AdminStandardListPage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminStandardListPage />
+                </Suspense>
               </RequireAdmin>
             )}
           />
@@ -132,7 +173,9 @@ function AppContent() {
             path="/admin/profile"
             element={(
               <RequireAdmin>
-                <AdminProfilePage />
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminProfilePage />
+                </Suspense>
               </RequireAdmin>
             )}
           />

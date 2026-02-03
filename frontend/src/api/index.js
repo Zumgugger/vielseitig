@@ -46,6 +46,10 @@ export const listsAPI = {
   deleteList: (listId) => 
     api.delete(`/user/lists/${listId}`),
   
+  // Share token management
+  regenerateShareToken: (listId) =>
+    api.post(`/user/lists/${listId}/regenerate-token`),
+  
   // Adjectives CRUD
   createAdjective: (listId, data) => 
     api.post(`/user/lists/${listId}/adjectives`, data),
@@ -148,6 +152,9 @@ export const adminAPI = {
   deleteUser: (userId) => 
     api.delete(`/admin/users/${userId}`),
   
+  resetUserPassword: (userId) =>
+    api.post(`/admin/users/${userId}/reset-password`),
+  
   // School management
   getSchools: () => 
     api.get('/admin/schools'),
@@ -170,6 +177,9 @@ export const adminAPI = {
   
   getSessionDetails: (sessionId) => 
     api.get(`/admin/analytics/sessions/${sessionId}`),
+  
+  getAnalyticsTimeseries: (days = 30) =>
+    api.get('/admin/analytics/timeseries', { params: { days } }),
   
   // Standard list
   getStandardList: () => 

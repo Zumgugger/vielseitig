@@ -254,6 +254,30 @@
     }
   }
 
+  /* Touch-friendly utilities (Mobile UX improvement) */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .touch-target {
+    /* Minimum 44x44px touch target (WCAG 2.5.5) */
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .touch-target-lg {
+    /* Larger touch target for primary actions */
+    min-width: 56px;
+    min-height: 56px;
+  }
+
+  /* Active states for touch feedback */
+  .touch-feedback {
+    @apply active:scale-95 active:opacity-90;
+    transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  }
+
   /* Responsive Text Sizes */
   .text-responsive {
     @apply text-sm md:text-base lg:text-lg;

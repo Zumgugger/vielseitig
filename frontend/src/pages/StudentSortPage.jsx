@@ -51,6 +51,9 @@ export default function StudentSortPage() {
   const [showInfo, setShowInfo] = useState(true);
   const [showExplanation, setShowExplanation] = useState(false);
   const [previewCollapsed, setPreviewCollapsed] = useState(true);
+  
+  // Session recovery state
+  const [pendingRecovery, setPendingRecovery] = useState(null); // {adjectives, sessionState, progress}
 
   // Calculate live preview cards (oft/manchmal only)
   const { oftCards, manchmalCards } = useMemo(() => {
@@ -95,33 +98,30 @@ export default function StudentSortPage() {
               const age = Date.now() - parsed.timestamp;
               const maxAge = 24 * 60 * 60 * 1000; // 24 hours
               
-              if (age < maxAge) {
-                // Restore adjectives and assignments from localStorage
-                // But create a new analytics session on the server (the old one may be gone after server restart)
-                console.log('[StudentSortPage] Restoring session, creating new analytics session on server');
+              if (age < maxAge && parsed.sessionState.currentIndex > 0) {
+                // Valid saved session found - show recovery dialog instead of auto-restoring
+                const completedCount = parsed.sessionState.currentIndex;
+                const totalCount = parsed.adjectives.length;
+                const progress = Math.round((completedCount / totalCount) * 100);
                 
-                // Start a new analytics session
-                const sessionResponse = await analyticsApi.startSession(
-                  parsed.sessionState.listId === 'default' ? null : parsed.sessionState.listId,
-                  null // themeId
-                );
-                
-                // Restore state with new session ID
-                setAdjectives(parsed.adjectives);
-                setSessionState({
-                  ...parsed.sessionState,
-                  sessionId: sessionResponse.data.session_id, // Use new session ID from server
+                setPendingRecovery({
+                  adjectives: parsed.adjectives,
+                  sessionState: parsed.sessionState,
+                  storageKey,
+                  progress,
+                  completedCount,
+                  totalCount,
                 });
                 setLoading(false);
-                console.log('[StudentSortPage] Restored session from localStorage with new server session');
+                console.log('[StudentSortPage] Found incomplete session, showing recovery dialog');
                 return;
-              } else {
+              } else if (age >= maxAge) {
                 console.log('[StudentSortPage] Saved session expired, starting fresh');
                 localStorage.removeItem(storageKey);
               }
             }
           } catch (err) {
-            console.error('[StudentSortPage] Failed to restore saved session:', err);
+            console.error('[StudentSortPage] Failed to parse saved session:', err);
             localStorage.removeItem(storageKey);
             // Continue to load fresh session
           }
@@ -246,8 +246,58 @@ export default function StudentSortPage() {
         setTimeout(() => handleFinish(), 500);
       }
     } catch (err) {
-      setToast({ message: 'Fehler beim Speichern', type: 'error' });
+      console.error('[StudentSortPage] Assignment error:', err);
+      
+      // Check if it's a network error
+      const isNetworkError = !err.response || err.code === 'ERR_NETWORK';
+      
+      if (isNetworkError) {
+        // For network errors, save locally and continue (offline-friendly)
+        setSessionState(prev => ({
+          ...prev,
+          assignments: [
+            ...prev.assignments,
+            { adjectiveId: currentAdjective.id, bucket },
+          ],
+          currentIndex: prev.currentIndex + 1,
+        }));
+        setShowExplanation(false);
+        setToast({ 
+          message: {
+            title: '📴 Offline-Modus',
+            detail: 'Deine Zuordnung wurde lokal gespeichert. Die Verbindung wird automatisch wiederhergestellt.'
+          }, 
+          type: 'warning' 
+        });
+      } else {
+        setToast({ 
+          message: {
+            title: 'Speichern fehlgeschlagen',
+            detail: err.response?.data?.detail || 'Bitte versuche es erneut.'
+          }, 
+          type: 'error',
+          onRetry: () => handleAssign(bucket)
+        });
+      }
     }
+  };
+
+  // Handle undo - remove last assignment and go back one step
+  const handleUndo = () => {
+    if (sessionState.assignments.length === 0 || sessionState.currentIndex === 0) {
+      setToast({ message: 'Nichts zum Rückgängigmachen', type: 'info' });
+      return;
+    }
+
+    // Remove the last assignment
+    setSessionState(prev => ({
+      ...prev,
+      assignments: prev.assignments.slice(0, -1),
+      currentIndex: prev.currentIndex - 1,
+    }));
+
+    setShowExplanation(false);
+    setToast({ message: '↩️ Letzte Zuordnung rückgängig gemacht', type: 'success' });
   };
 
   // Keyboard controls
@@ -268,6 +318,10 @@ export default function StudentSortPage() {
         case 'arrowright':
           handleAssign('oft');
           break;
+        case 'w':
+        case 'arrowup':
+          handleUndo();
+          break;
         case ' ':
           e.preventDefault();
           setShowExplanation(!showExplanation);
@@ -282,7 +336,7 @@ export default function StudentSortPage() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentAdjective, showExplanation, showInfo]);
+  }, [currentAdjective, showExplanation, showInfo, sessionState.assignments.length]);
 
   const handleFinish = async () => {
     try {
@@ -306,9 +360,106 @@ export default function StudentSortPage() {
       // Navigate to results page
       navigate(token ? `/results/${token}` : '/results', { replace: true });
     } catch (err) {
-      setToast({ message: 'Fehler beim Abschließen', type: 'error' });
+      console.error('[StudentSortPage] Finish error:', err);
+      setToast({ 
+        message: {
+          title: 'Abschließen fehlgeschlagen',
+          detail: 'Die Verbindung zum Server ist unterbrochen. Deine Sortierung ist aber gespeichert.'
+        }, 
+        type: 'error',
+        onRetry: handleFinish
+      });
     }
   };
+
+  // Handle session recovery - continue previous session
+  const handleContinueSession = async () => {
+    if (!pendingRecovery) return;
+    
+    try {
+      setLoading(true);
+      console.log('[StudentSortPage] Continuing previous session');
+      
+      // Start a new analytics session on the server
+      const sessionResponse = await analyticsApi.startSession(
+        pendingRecovery.sessionState.listId === 'default' ? null : pendingRecovery.sessionState.listId,
+        null // themeId
+      );
+      
+      // Restore state with new session ID
+      setAdjectives(pendingRecovery.adjectives);
+      setSessionState({
+        ...pendingRecovery.sessionState,
+        sessionId: sessionResponse.data.session_id,
+      });
+      setPendingRecovery(null);
+      setToast({ message: `Fortgesetzt: ${pendingRecovery.completedCount}/${pendingRecovery.totalCount} sortiert`, type: 'success' });
+    } catch (err) {
+      console.error('[StudentSortPage] Failed to continue session:', err);
+      setToast({ message: 'Fehler beim Fortsetzen', type: 'error' });
+      // Clear and start fresh
+      localStorage.removeItem(pendingRecovery.storageKey);
+      setPendingRecovery(null);
+      window.location.reload();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle session recovery - start fresh
+  const handleStartFresh = async () => {
+    if (!pendingRecovery) return;
+    
+    console.log('[StudentSortPage] Starting fresh, clearing saved session');
+    localStorage.removeItem(pendingRecovery.storageKey);
+    setPendingRecovery(null);
+    setLoading(true);
+    // Reload the page to start fresh
+    window.location.reload();
+  };
+
+  // Show recovery dialog if we have a pending session
+  if (pendingRecovery && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
+        <div className="card max-w-md text-center">
+          <div className="text-6xl mb-4">🔄</div>
+          <h1 className="text-2xl font-bold mb-2">Unvollständige Session gefunden</h1>
+          <p className="text-gray-600 mb-4">
+            Du hast eine nicht abgeschlossene Session. Möchtest du fortfahren?
+          </p>
+          
+          {/* Progress visualization */}
+          <div className="bg-gray-100 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-700">Fortschritt</span>
+              <span className="text-sm text-gray-600">
+                {pendingRecovery.completedCount} / {pendingRecovery.totalCount}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-blue-600 h-3 rounded-full transition-all"
+                style={{ width: `${pendingRecovery.progress}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {pendingRecovery.progress}% sortiert
+            </p>
+          </div>
+          
+          <div className="flex flex-col gap-3">
+            <Button variant="primary" onClick={handleContinueSession} className="w-full">
+              ▶️ Fortfahren
+            </Button>
+            <Button variant="secondary" onClick={handleStartFresh} className="w-full">
+              🔄 Neu starten
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) return <Loading fullscreen />;
 
@@ -318,7 +469,10 @@ export default function StudentSortPage() {
         <div className="card max-w-md text-center">
           <div className="text-6xl mb-4">❌</div>
           <h1 className="text-2xl font-bold mb-2">Fehler</h1>
-          <p className="text-gray-600">{error}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            🔄 Seite neu laden
+          </Button>
         </div>
       </div>
     );
@@ -340,6 +494,7 @@ export default function StudentSortPage() {
               <li><strong>A</strong> oder <strong>←</strong> = Selten</li>
               <li><strong>S</strong> oder <strong>↓</strong> = Manchmal</li>
               <li><strong>D</strong> oder <strong>→</strong> = Oft</li>
+              <li><strong>W</strong> oder <strong>↑</strong> = Rückgängig</li>
               <li><strong>Space</strong> = Erklärung anzeigen</li>
               <li><strong>I</strong> = Diesen Hinweis ausblenden</li>
             </ul>
@@ -375,18 +530,18 @@ export default function StudentSortPage() {
 
             {/* Adjective Card - Main */}
             {currentAdjective ? (
-              <div className="card text-center mb-8">
+              <div className="card text-center mb-6 sm:mb-8">
                 {/* Adjective Display */}
-                <div className="mb-8">
-                  <p className="text-lg text-gray-600 mb-4">Das Adjektiv:</p>
-                  <h1 className="text-5xl lg:text-6xl font-bold text-blue-600 mb-2">
+                <div className="mb-6 sm:mb-8">
+                  <p className="text-base sm:text-lg text-gray-600 mb-3 sm:mb-4">Das Adjektiv:</p>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-600 mb-2 break-words">
                     {currentAdjective.word}
                   </h1>
 
-                  {/* Explanation Toggle */}
+                  {/* Explanation Toggle - Larger touch target on mobile */}
                   <button
                     onClick={() => setShowExplanation(!showExplanation)}
-                    className="text-sm text-gray-500 hover:text-gray-700 mt-4 inline-flex items-center gap-1"
+                    className="text-sm sm:text-base text-gray-500 hover:text-gray-700 mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition touch-manipulation"
                   >
                     <span>ℹ️ Erklärung</span>
                     <span>{showExplanation ? '▼' : '▶'}</span>
@@ -405,37 +560,52 @@ export default function StudentSortPage() {
                   )}
                 </div>
 
-                {/* Bucket Buttons */}
-                <div className="grid grid-cols-3 gap-4">
+                {/* Bucket Buttons - Touch-friendly sizing */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   <Button
                     variant="danger"
-                    size="lg"
+                    size="xl"
                     onClick={() => handleAssign('selten')}
-                    className="h-24 text-lg font-semibold"
+                    className="h-28 sm:h-24 text-base sm:text-lg font-semibold flex flex-col items-center justify-center touch-manipulation"
                   >
-                    😕<br />Selten
+                    <span className="text-2xl sm:text-xl mb-1">😕</span>
+                    <span>Selten</span>
                   </Button>
                   <Button
                     variant="secondary"
-                    size="lg"
+                    size="xl"
                     onClick={() => handleAssign('manchmal')}
-                    className="h-24 text-lg font-semibold"
+                    className="h-28 sm:h-24 text-base sm:text-lg font-semibold flex flex-col items-center justify-center touch-manipulation"
                   >
-                    😐<br />Manchmal
+                    <span className="text-2xl sm:text-xl mb-1">😐</span>
+                    <span>Manchmal</span>
                   </Button>
                   <Button
                     variant="primary"
-                    size="lg"
+                    size="xl"
                     onClick={() => handleAssign('oft')}
-                    className="h-24 text-lg font-semibold"
+                    className="h-28 sm:h-24 text-base sm:text-lg font-semibold flex flex-col items-center justify-center touch-manipulation"
                   >
-                    😊<br />Oft
+                    <span className="text-2xl sm:text-xl mb-1">😊</span>
+                    <span>Oft</span>
                   </Button>
                 </div>
 
+                {/* Undo Button */}
+                {sessionState.assignments.length > 0 && (
+                  <div className="mt-4">
+                    <button
+                      onClick={handleUndo}
+                      className="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1 px-3 py-1 rounded-lg hover:bg-gray-100 transition"
+                    >
+                      ↩️ Rückgängig (W)
+                    </button>
+                  </div>
+                )}
+
                 {/* Keyboard Help */}
-                <p className="text-xs text-gray-500 mt-6">
-                  💡 Tipp: Nutze <strong>A</strong>, <strong>S</strong>, <strong>D</strong> oder Pfeiltasten | <strong>Space</strong> für Erklärung
+                <p className="text-xs text-gray-500 mt-4">
+                  💡 Tipp: <strong>A</strong>/<strong>S</strong>/<strong>D</strong> oder Pfeiltasten | <strong>W</strong> = Rückgängig | <strong>Space</strong> = Erklärung
                 </p>
               </div>
             ) : (

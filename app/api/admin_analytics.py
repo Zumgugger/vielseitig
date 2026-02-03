@@ -292,3 +292,71 @@ async def get_session_details(
         "assignment_count": len(assignments),
         "assignments": assignment_details
     }
+
+
+class TimeSeriesPoint(BaseModel):
+    date: str
+    sessions: int
+    completed: int
+    pdf_exports: int
+
+
+class TimeSeriesResponse(BaseModel):
+    period: str
+    data: List[TimeSeriesPoint]
+
+
+@router.get("/timeseries", response_model=TimeSeriesResponse)
+async def get_analytics_timeseries(
+    admin: Admin = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+    days: int = 30
+):
+    """
+    Get time-series analytics data for charting.
+    
+    Returns daily session counts, completions, and PDF exports
+    for the specified number of days (default 30).
+    """
+    from datetime import timedelta
+    
+    # Limit to reasonable range
+    days = min(max(days, 7), 365)
+    
+    # Calculate date range
+    end_date = datetime.utcnow().replace(hour=23, minute=59, second=59)
+    start_date = (end_date - timedelta(days=days)).replace(hour=0, minute=0, second=0)
+    
+    # Get all sessions in range
+    sessions_result = await db.execute(
+        select(AnalyticsSession)
+        .where(AnalyticsSession.started_at >= start_date)
+        .where(AnalyticsSession.started_at <= end_date)
+    )
+    sessions = sessions_result.scalars().all()
+    
+    # Group by date
+    daily_data = {}
+    for i in range(days + 1):
+        date_key = (start_date + timedelta(days=i)).strftime("%Y-%m-%d")
+        daily_data[date_key] = {"sessions": 0, "completed": 0, "pdf_exports": 0}
+    
+    for session in sessions:
+        date_key = session.started_at.strftime("%Y-%m-%d")
+        if date_key in daily_data:
+            daily_data[date_key]["sessions"] += 1
+            if session.finished_at:
+                daily_data[date_key]["completed"] += 1
+            if session.pdf_exported_at:
+                daily_data[date_key]["pdf_exports"] += 1
+    
+    # Convert to list
+    data = [
+        TimeSeriesPoint(date=date, **counts)
+        for date, counts in sorted(daily_data.items())
+    ]
+    
+    return TimeSeriesResponse(
+        period=f"{days} days",
+        data=data
+    )

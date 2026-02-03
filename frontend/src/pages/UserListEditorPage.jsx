@@ -225,6 +225,52 @@ export default function UserListEditorPage() {
     }
   };
 
+  // Move adjective up/down in the list
+  const handleMoveAdjective = async (adjectiveId, direction) => {
+    if (!canEdit) return;
+    
+    const sortedAdjectives = [...adjectives].sort((a, b) => a.order_index - b.order_index);
+    const currentIndex = sortedAdjectives.findIndex(adj => adj.id === adjectiveId);
+    
+    if (currentIndex === -1) return;
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === sortedAdjectives.length - 1) return;
+    
+    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const currentAdj = sortedAdjectives[currentIndex];
+    const swapAdj = sortedAdjectives[swapIndex];
+    
+    // Swap order indices
+    const tempOrder = currentAdj.order_index;
+    const newCurrentOrder = swapAdj.order_index;
+    const newSwapOrder = tempOrder;
+    
+    try {
+      // Update both adjectives
+      await Promise.all([
+        listsAPI.updateAdjective(list.id, currentAdj.id, { ...currentAdj, order_index: newCurrentOrder }),
+        listsAPI.updateAdjective(list.id, swapAdj.id, { ...swapAdj, order_index: newSwapOrder }),
+      ]);
+      
+      // Update local state
+      setAdjectives(prev => prev.map(adj => {
+        if (adj.id === currentAdj.id) return { ...adj, order_index: newCurrentOrder };
+        if (adj.id === swapAdj.id) return { ...adj, order_index: newSwapOrder };
+        return adj;
+      }));
+      
+      setToast({ message: 'Reihenfolge geändert', type: 'success' });
+    } catch (err) {
+      const message = err.response?.data?.detail || 'Reihenfolge konnte nicht geändert werden';
+      setToast({ message, type: 'error' });
+    }
+  };
+
+  // Sorted adjectives for display
+  const sortedAdjectives = useMemo(() => {
+    return [...adjectives].sort((a, b) => a.order_index - b.order_index);
+  }, [adjectives]);
+
   if (loading) return <Loading fullscreen />;
 
   if (error) {
@@ -369,16 +415,40 @@ export default function UserListEditorPage() {
             <table className="table">
               <thead>
                 <tr>
+                  {canEdit && <th className="w-20">Sortieren</th>}
                   <th>Wort</th>
                   <th>Erklärung</th>
                   <th>Beispiel</th>
-                  <th>Reihenfolge</th>
                   {canEdit && <th>Aktionen</th>}
                 </tr>
               </thead>
               <tbody>
-                {adjectives.map((adj) => (
+                {sortedAdjectives.map((adj, index) => (
                   <tr key={adj.id}>
+                    {canEdit && (
+                      <td className="w-20">
+                        <div className="flex flex-col gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveAdjective(adj.id, 'up')}
+                            disabled={index === 0}
+                            className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            title="Nach oben"
+                          >
+                            ⬆️
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveAdjective(adj.id, 'down')}
+                            disabled={index === sortedAdjectives.length - 1}
+                            className="p-1 text-gray-500 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            title="Nach unten"
+                          >
+                            ⬇️
+                          </button>
+                        </div>
+                      </td>
+                    )}
                     <td className="min-w-[160px]">
                       <input
                         type="text"
@@ -405,14 +475,6 @@ export default function UserListEditorPage() {
                         className="form-input"
                       />
                     </td>
-                    <td className="w-28">
-                      <input
-                        type="number"
-                        value={adj.order_index}
-                        onChange={(e) => setAdjectives((prev) => prev.map((a) => (a.id === adj.id ? { ...a, order_index: Number(e.target.value) } : a)))}
-                        disabled={!canEdit}
-                      />
-                    </td>
                     {canEdit && (
                       <td className="space-x-2 whitespace-nowrap">
                         <Button variant="secondary" size="sm" onClick={() => handleUpdateAdjective(adj)}>
@@ -426,9 +488,9 @@ export default function UserListEditorPage() {
                   </tr>
                 ))}
 
-                {adjectives.length === 0 && (
+                {sortedAdjectives.length === 0 && (
                   <tr>
-                    <td colSpan={canEdit ? 5 : 4} className="text-center py-6 text-gray-500">
+                    <td colSpan={canEdit ? 5 : 3} className="text-center py-6 text-gray-500">
                       Noch keine Adjektive vorhanden.
                     </td>
                   </tr>

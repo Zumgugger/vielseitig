@@ -392,6 +392,43 @@ async def delete_list(
     return {"message": "List deleted", "id": listId}
 
 
+@router.post("/{listId}/regenerate-token")
+async def regenerate_share_token(
+    listId: int,
+    user: User = Depends(require_active_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """Regenerate the share token for a list (extends expiry by 1 year)."""
+    result = await db.execute(select(ListModel).where(ListModel.id == listId))
+    list_obj = result.scalar_one_or_none()
+    
+    if not list_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="List not found")
+    
+    # Permission: only owner can regenerate token
+    if list_obj.owner_user_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only owner can regenerate token")
+    
+    # Generate new token and extend expiry
+    new_token = secrets.token_urlsafe(32)
+    new_expiry = datetime.utcnow() + timedelta(days=365)
+    
+    list_obj.share_token = new_token
+    list_obj.share_expires_at = new_expiry
+    list_obj.share_enabled = True
+    list_obj.updated_at = datetime.utcnow()
+    
+    db.add(list_obj)
+    await db.commit()
+    await db.refresh(list_obj)
+    
+    return {
+        "message": "Share token regenerated",
+        "share_token": new_token,
+        "share_expires_at": new_expiry.isoformat(),
+    }
+
+
 # ============ ADJECTIVE CRUD ============
 
 
