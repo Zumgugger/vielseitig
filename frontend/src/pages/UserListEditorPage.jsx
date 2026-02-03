@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Button, Input, Loading, Toast } from '../components';
 import { authAPI, listsAPI } from '../api';
 
 export default function UserListEditorPage() {
   const { listId } = useParams();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [list, setList] = useState(null);
   const [listDraft, setListDraft] = useState(null);
   const [adjectives, setAdjectives] = useState([]);
   const [newAdjective, setNewAdjective] = useState({ word: '', explanation: '', example: '' });
   const [loading, setLoading] = useState(true);
+  const [forking, setForking] = useState(false);
   const [toast, setToast] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrUrl, setQrUrl] = useState('');
@@ -22,7 +24,17 @@ export default function UserListEditorPage() {
   const canEdit = useMemo(() => {
     if (!profile || !list) return false;
     if (list.is_default) return false;
+    if (list.is_premium) return false;
     return list.owner_user_id === profile.id;
+  }, [list, profile]);
+
+  // Show fork button for school-shared/premium lists user doesn't own
+  const showForkButton = useMemo(() => {
+    if (!profile || !list) return false;
+    if (list.is_default) return true; // Can fork standard list
+    if (list.is_premium) return true; // Can fork premium lists
+    if (list.share_with_school && list.owner_user_id !== profile.id) return true;
+    return false;
   }, [list, profile]);
 
   useEffect(() => {
@@ -175,6 +187,21 @@ export default function UserListEditorPage() {
     }
   };
 
+  const handleForkList = async () => {
+    if (!list) return;
+    setForking(true);
+    try {
+      const response = await listsAPI.forkList(list.id);
+      setToast({ message: response.data.message || 'Liste kopiert!', type: 'success' });
+      // Navigate to the newly forked list
+      navigate(`/user/lists/${response.data.id}`);
+    } catch (err) {
+      const message = err.response?.data?.detail || 'Liste konnte nicht kopiert werden';
+      setToast({ message, type: 'error' });
+      setForking(false);
+    }
+  };
+
   const handleAddAdjective = async (event) => {
     event.preventDefault();
     if (!canEdit) return;
@@ -222,10 +249,23 @@ export default function UserListEditorPage() {
             <p className="text-sm text-gray-600">Listen-Editor</p>
             <h1 className="text-3xl font-bold text-gray-900">{list?.name}</h1>
             {list?.is_default && (
-              <p className="text-sm text-gray-600 mt-1">Standardliste ist nur lesbar.</p>
+              <p className="text-sm text-gray-600 mt-1">Standardliste ist nur lesbar. Erstelle eine Kopie zum Bearbeiten.</p>
+            )}
+            {list?.is_premium && (
+              <p className="text-sm text-gray-600 mt-1">Premium-Liste ist nur lesbar. Erstelle eine Kopie zum Bearbeiten.</p>
+            )}
+            {!canEdit && !list?.is_default && !list?.is_premium && list?.share_with_school && (
+              <p className="text-sm text-gray-600 mt-1">Diese Liste gehört einer anderen Lehrkraft. Erstelle eine Kopie zum Bearbeiten.</p>
             )}
           </div>
-          <Link to="/user/lists" className="btn btn-outline">Zurück</Link>
+          <div className="flex gap-2">
+            {showForkButton && (
+              <Button variant="primary" onClick={handleForkList} disabled={forking}>
+                {forking ? '⏳ Kopiere...' : '📋 Als Kopie bearbeiten'}
+              </Button>
+            )}
+            <Link to="/user/lists" className="btn btn-outline">Zurück</Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

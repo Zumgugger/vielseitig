@@ -56,6 +56,10 @@ export const listsAPI = {
   deleteAdjective: (listId, adjectiveId) => 
     api.delete(`/user/lists/${listId}/adjectives/${adjectiveId}`),
   
+  // Fork / Copy-on-Write
+  forkList: (listId) => 
+    api.post(`/user/lists/${listId}/fork`),
+  
   // QR Code
   getListQRCode: (listId) => 
     api.get(`/user/lists/${listId}/qr`, { responseType: 'blob' }),

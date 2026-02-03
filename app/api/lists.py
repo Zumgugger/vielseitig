@@ -570,3 +570,109 @@ async def delete_adjective(
     await db.commit()
     
     return {"message": "Adjective deleted", "id": adjectiveId}
+
+
+# ============ FORK / COPY-ON-WRITE ============
+
+
+class ForkListResponse(BaseModel):
+    """Response for fork operation."""
+    id: int
+    name: str
+    description: Optional[str]
+    source_list_id: int
+    share_token: str
+    message: str
+
+
+@router.post("/{listId}/fork", response_model=ForkListResponse)
+async def fork_list(
+    listId: int,
+    user: User = Depends(require_active_user),
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Fork (copy) a list to create a personal editable copy.
+    
+    Used for:
+    - Copying school-shared lists before editing
+    - Copying premium lists to customize
+    - Creating personal variants of the standard list
+    
+    The fork:
+    - Sets source_list_id to reference the original
+    - Is owned by the current user
+    - Has share_with_school=True by default (so others can see your changes)
+    - Gets a new share token for distribution
+    """
+    # Get the source list
+    result = await db.execute(select(ListModel).where(ListModel.id == listId))
+    source_list = result.scalar_one_or_none()
+    
+    if not source_list:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="List not found")
+    
+    # Permission: user must have read access to fork
+    # This includes: default/premium lists, own lists, school-shared lists
+    has_access = (
+        source_list.is_default or 
+        source_list.is_premium or 
+        source_list.owner_user_id == user.id or 
+        source_list.share_with_school
+    )
+    
+    if not has_access:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+    
+    # Generate new share token and expiry
+    share_token = secrets.token_urlsafe(32)
+    share_expires_at = datetime.utcnow() + timedelta(days=365)
+    
+    # Create the forked list
+    forked_list = ListModel(
+        name=f"{source_list.name} (Kopie)",
+        description=source_list.description,
+        is_default=False,
+        is_premium=False,
+        owner_user_id=user.id,
+        share_token=share_token,
+        share_expires_at=share_expires_at,
+        share_enabled=True,
+        share_with_school=True,  # Share with school by default
+        source_list_id=source_list.id
+    )
+    
+    db.add(forked_list)
+    await db.commit()
+    await db.refresh(forked_list)
+    
+    # Copy all adjectives from source list
+    adj_result = await db.execute(
+        select(Adjective)
+        .where(Adjective.list_id == listId)
+        .order_by(Adjective.order_index)
+    )
+    source_adjectives = adj_result.scalars().all()
+    
+    for src_adj in source_adjectives:
+        new_adj = Adjective(
+            list_id=forked_list.id,
+            word=src_adj.word,
+            explanation=src_adj.explanation,
+            example=src_adj.example,
+            order_index=src_adj.order_index,
+            active=src_adj.active
+        )
+        db.add(new_adj)
+    
+    await db.commit()
+    
+    return ForkListResponse(
+        id=forked_list.id,
+        name=forked_list.name,
+        description=forked_list.description,
+        source_list_id=source_list.id,
+        share_token=forked_list.share_token,
+        message=f"Liste erfolgreich kopiert. Du kannst sie jetzt bearbeiten."
+    )
+

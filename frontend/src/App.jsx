@@ -22,6 +22,8 @@ import AdminPendingPage from './pages/AdminPendingPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminSchoolsPage from './pages/AdminSchoolsPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+import AdminStandardListPage from './pages/AdminStandardListPage';
+import AdminProfilePage from './pages/AdminProfilePage';
 import ImpressumPage from './pages/ImpressumPage';
 import DatenschutzPage from './pages/DatenschutzPage';
 
@@ -115,6 +117,22 @@ function AppContent() {
             element={(
               <RequireAdmin>
                 <AdminAnalyticsPage />
+              </RequireAdmin>
+            )}
+          />
+          <Route
+            path="/admin/standard-list"
+            element={(
+              <RequireAdmin>
+                <AdminStandardListPage />
+              </RequireAdmin>
+            )}
+          />
+          <Route
+            path="/admin/profile"
+            element={(
+              <RequireAdmin>
+                <AdminProfilePage />
               </RequireAdmin>
             )}
           />
